@@ -209,27 +209,58 @@ Agent: 文本 → questions（Agent 自己解析，不走 A）
 ### Skill B: 考点预测器
 
 ```jsonc
-// 输入
+// 输入：试卷池（≥2 份历年卷，由 Skill A 产出 questions）
 {
-  "ppt_paths": ["C:/.../ch3.pptx"],
-  "past_exam_questions": [...],
-  "focus_topics": ["第三章"],
-  "config": {"algorithm": "tfidf_textrank_llm", "predicted_questions_n": 15}
+  "exams": [
+    {
+      "id": "2024-25",
+      "label": "2024-2025 学年",
+      "questions": [
+        {"number": 4, "type": "fill", "score": 4,
+         "stem_latex": "设 $D=\\{(x,y)|x^2+y^2\\le 1\\}$，则 $\\iint_D |x+y|d\\sigma=$____"}
+      ]
+    }
+  ]
 }
 
-// 输出
+// 输出：按信号强度排序的考点簇
 {
-  "keywords": [{"term": "中心极限定理", "weight": 0.92, "source": "..."}],
-  "predicted_questions": [
+  "n_exams": 3,
+  "exam_ids": ["2023-24", "2024-25", "gongshu-2024-25"],
+  "threshold": 0.5,
+  "predictions": [
     {
-      "id": "P1", "type": "calculation", "topic": "假设检验",
-      "weight": 0.88, "rationale": "近 3 年出现 5 次",
-      "sample_question_latex": "...", "expected_difficulty": "medium"
+      "rank": 1, "score": 1.0,
+      "repeat": 1.0,
+      "exams_seen": ["2023-24", "2024-25", "gongshu-2024-25"],
+      "position_stability": 1.0,
+      "positions": {"fill#4": 3},
+      "n_members": 3,
+      "rationale": "在 3/3 份试卷中出现；3 次位于第 4 题（fill）；未缺席，判为必考",
+      "stem_samples": ["..."]
     }
-  ],
-  "explainability": {"method": "TF-IDF + TextRank + LLM"}
+  ]
 }
 ```
+
+**实现方式**（本仓库已提供）：
+
+```bash
+python scripts/predict/predictor.py --input pool.json --output predictions.json
+python scripts/predict/predictor.py --input pool.json --threshold 0.4 --format text
+```
+
+**打分公式**（详见 `docs/dataset-observations.md`）：
+
+```
+score = 0.75 × 跨卷重复度 + 0.25 × 位置稳定性
+跨卷重复度   = 该簇出现的卷数 / 总卷数
+位置稳定性   = 簇内「题型 + 题号」一致的样本占比
+```
+
+**为什么不用 TF-IDF / 知识追踪**：小样本（2-4 份）下 IDF 只有 3 档、区分度极低；知识追踪需要上万条学生答题数据。真实观察表明「跨卷重复度」本身就是最强信号——三份同课程试卷的 9 道填空题里有 8 道完全相同。
+
+**课件 PPT 为可选输入**：当前实现只用试卷；若提供课件，可加回「PPT 覆盖度」维度（需重新分配权重）。
 
 ### Skill C: LaTeX 试卷生成
 

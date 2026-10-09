@@ -1,0 +1,157 @@
+From 0fe871f38aac7ca6bdfebf66f8a0070185711538 Mon Sep 17 00:00:00 2001
+From: sunny <213254234@seu.edu.cn>
+Date: Fri, 9 Oct 2026 17:12:07 +0800
+Subject: [PATCH] Add \examanswerspace; fix misleading documentation on [..]
+ argument
+
+The examquestions environment's optional argument sets \parskip, which
+only takes effect BETWEEN paragraphs. Using it for answer space therefore
+produces two counter-intuitive results:
+  1) the gap lands BEFORE the first question (the newline/indent at the
+     start of the environment body forms an empty paragraph)
+  2) the LAST question gets no space (no following paragraph, so the
+     skip is discarded at the end of the document)
+
+Changes:
+- exampaper.cls: add \examanswerspace{<length>} (\par\vspace{#1}) for
+  explicit per-question answer space that also works on the last question
+- README.md: correct the four places describing [7cm] as answer space;
+  add the pitfall to the gotchas list; document the new command
+- example-exam.tex: use [0pt] + \examanswerspace{7cm}
+- main.tex: update skeleton comments and the sample section
+---
+ README.md        | 15 ++++++++++-----
+ exampaper.cls    | 13 +++++++++++++
+ example-exam.tex |  8 ++++++--
+ main.tex         |  6 ++++--
+ 4 files changed, 33 insertions(+), 9 deletions(-)
+
+diff --git a/README.md b/README.md
+index 2dc65e4..97a2c12 100644
+--- a/README.md
++++ b/README.md
+@@ -26,7 +26,7 @@
+ - 抬头信息栏：`课程名称 / 课程代码 / 考试学期 / 适用专业 / 考试形式 / 考试时长`，带下划线填空；
+ - 评分表：`题号 | 一 | 二 | … | 总分`，`得分 / 评阅人` 两行，「总分」列自动跨行合并，栏数可调；
+ - 大题自动编号（`一、` `二、` `三、` …）、小题自动编号（`1.` `2.` …），每栏小题号自动重置；
+-- 答题留白：`\begin{examquestions}[7cm]` 一个参数即可在每题后留出空白；
++- 答题留白：`\examanswerspace{7cm}` 放在题干之后，逐题留出书写空间（含最后一题）；
+ - 左侧竖排**密封线**：考场纪律提示 + 学号/姓名 + 点线「密 封 线」，逐页出现在背景层；
+ - 插图：内置 `\examfigure` 命令（也支持标准 `figure` 环境），图片放 `figures/` 即可；
+ - 页脚：`试卷名　共 X 页　第 Y 页`，总页数自动统计，多页不掉页码；
+@@ -150,8 +150,9 @@ Overleaf 首页 → **New Project → Import from GitHub**，选择本仓库即
+ \end{examquestions}
+ 
+ \examsection{计算题（本题共 ? 小题，每小题 ? 分，满分 ? 分）}
+-\begin{examquestions}[7cm]                 % 7cm = 每题后留出的答题空间
++\begin{examquestions}[0pt]                 % 0pt：题目紧排，答题空间逐题显式留出
+   \examquestion 〈题干〉
++  \examanswerspace{7cm}                    % 本题 7cm 答题空间（最后一题同样生效）
+ \end{examquestions}
+ 
+ \end{document}
+@@ -187,14 +188,17 @@ png / jpg / pdf 都能直接插入；svg 请先转成 pdf。表格用标准 `tab
+ | --- | --- |
+ | 让某道大题整体挪到下一页开头 | 在 `\examsection{...}` 前加 `\newpage` |
+ | 长题目自动断开 | 不用管，LaTeX 会在行间自动分页 |
+-| 加/减答题空间 | 调 `\begin{examquestions}[7cm]` 的间距，或改 `\examitemsep` |
++| 加/减答题空间 | 调 `\examanswerspace{7cm}` 里的长度 |
+ | 整份试卷不要密封线 | 导言区写 `\examsidebarfalse` |
+ 
+-两个容易踩的点：
++三个容易踩的点：
+ 
+ 1. **必须编译两遍**，否则页脚总页数是上一轮的；
+ 2. **单处答题留白别超过一页**：当前页只剩 3cm 而你要 7cm 时，空白会被切到下一页，
+    看起来像「答题位置不见了」。对策：调小间距，或在该大题前 `\newpage`。
++3. **不要用 `\begin{examquestions}[7cm]` 留答题空间**（这是最常见的误解）。
++   该参数是 `\parskip`（段间距），只在段落**之间**生效，实际效果是
++   「留白跑到第一题之前、最后一题之后反而没有」。请改用 `\examanswerspace{7cm}`。
+ 
+ ## 命令速查
+ 
+@@ -205,7 +209,8 @@ png / jpg / pdf 都能直接插入；svg 请先转成 pdf。表格用标准 `tab
+ | `\examfield[宽]{项目名}{内容}` | 抬头信息栏的一项；宽度即下划线长度，内容留空得到空白横线，内容用楷体 |
+ | `\examscoretable[大题数]` | 评分表，默认 6 个评阅格，宽度自动撑满版心 |
+ | `\examsection{栏目标题}` | 大题标题，自动加「一、」「二、」…，并把小题号重置为 1 |
+-| `\begin{examquestions}[题间距]` … `\end{examquestions}` | 小题区；默认 13pt，给如 `[7cm]` 即每题后留答题空间 |
++| `\begin{examquestions}[题间距]` … `\end{examquestions}` | 小题区；参数是**题间距**，默认 13pt（不是答题空间） |
++| `\examanswerspace{长度}` | 在某题后留出答题空间（最后一题同样生效）；配合 `[0pt]` 使用 |
+ | `\examquestion` | 输出「1.」「2.」…（每道大题内重新计数），别名 `\question` |
+ | `\begin{examproblem}` … `\end{examproblem}` | 单个大题（不自动编号小题） |
+ | `\examfigure[宽]{图题}{图片文件}` | 插入一张图并自动给图号 |
+diff --git a/exampaper.cls b/exampaper.cls
+index 3166938..cd4e246 100644
+--- a/exampaper.cls
++++ b/exampaper.cls
+@@ -213,6 +213,19 @@
+ %% 可选短别名（若文档中未定义 \question）
+ \providecommand*{\question}{\examquestion}
+ 
++%% ---------------------------------------------------------------------------
++%% 9c. 答题空间：\examanswerspace{<长度>}
++%%     放在 \examquestion 题干之后，为本题留出书写空间；**最后一题同样生效**。
++%%     用法：\examquestion 〈题干〉 \examanswerspace{7cm}
++%%
++%%     ⚠️ 不要用 \begin{examquestions}[<长度>] 来留答题空间。那个参数是
++%%     \parskip（段间距），只在段落**之间**生效，会造成两个反直觉的结果：
++%%       1) 留白落在第一题之前（环境体开头的换行/缩进构成一个空段落）；
++%%       2) 最后一题之后不留白（没有后继段落，间距在文档末尾被丢弃）。
++%%     本命令显式结束当前段落再补垂直间距，位置确定、首尾都生效。
++%% ---------------------------------------------------------------------------
++\newcommand{\examanswerspace}[1]{\par\vspace{#1}}
++
+ %% ===========================================================================
+ %% 9b. 插图：\examfigure[<宽度>]{<图题>}{<图片文件>}
+ %%     默认宽度 0.6\textwidth；图片建议放在 figures/ 目录下。
+diff --git a/example-exam.tex b/example-exam.tex
+index ace4200..56c8439 100644
+--- a/example-exam.tex
++++ b/example-exam.tex
+@@ -59,11 +59,15 @@
+     C.\ $\sum_{n=1}^{\infty}(-1)^{n}$ \quad D.\ $\sum_{n=1}^{\infty}2^{n}$
+ \end{examquestions}
+ 
+-%% ======================= 三、计算题（小题之间留答题空间）=======================
++%% ======================= 三、计算题（逐题留答题空间）=======================
++%% 注意：答题空间用 \examanswerspace{...} 逐题留出，不要用 [7cm] 参数
++%%       （那个参数是 \parskip 题间距，会让留白跑到第一题之前、最后一题却没有）。
+ \examsection{计算题（本题共 2 小题，每小题 8 分，满分 16 分）}
+-\begin{examquestions}[7cm]              % 小题之间留 7cm 答题空间
++\begin{examquestions}[0pt]
+   \examquestion 计算 $\displaystyle\lim_{x\to 0}\frac{\sin x}{x}$。
++  \examanswerspace{7cm}
+   \examquestion 计算 $\displaystyle\int_{0}^{1} x^{2}\,\mathrm{d}x$。
++  \examanswerspace{7cm}
+ \end{examquestions}
+ 
+ %% ======================= 四、应用题（含插图）=======================
+diff --git a/main.tex b/main.tex
+index 322909c..8ab4978 100644
+--- a/main.tex
++++ b/main.tex
+@@ -51,8 +51,9 @@
+ 
+   %% 大题与小题：
+   %% \examsection{<栏目标题>}              自动加「一、」「二、」…（每题重新计小题号）
+-  %% \begin{examquestions}[<小题间距>]     小题区，默认 13pt；要留答题空间就写大些，如 [7cm]
++  %% \begin{examquestions}[<题间距>]        小题区，参数是题间距（默认 13pt），不是答题空间
+   %%   \examquestion <题干>
++  %%   \examanswerspace{7cm}                本题的答题空间（最后一题同样生效）
+   %% \end{examquestions}
+   %% \begin{examproblem} <题干> \end{examproblem}   单个大题
+   %% \examfigure[<宽度>]{<图题>}{<图片文件>}        插图（图片放 figures/ 下）
+@@ -64,8 +65,9 @@
+   \end{examquestions}
+ 
+   \examsection{〈第二栏标题，例如：计算题（本题共 ? 小题，每小题 ? 分，满分 ? 分）〉}
+-  \begin{examquestions}[7cm]%  小题之间留 7cm 答题空间
++  \begin{examquestions}[0pt]%  0pt：题目紧排，答题空间逐题显式留出
+     % \examquestion 〈题干〉
++    % \examanswerspace{7cm}   本题 7cm 答题空间
+   \end{examquestions}
+ 
+   \examsection{〈第三栏标题〉}
+-- 
+2.54.0.windows.1
+

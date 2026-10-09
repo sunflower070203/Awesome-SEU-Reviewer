@@ -21,6 +21,10 @@ htmlcov/
 # 临时目录（脚本用后即删）
 .tmp-template/
 .tmp-bridge/
+.tmp-extract/
+
+# 真实试卷与转录数据（版权与隐私，不入库）
+pool.json
 
 # LaTeX
 *.aux
