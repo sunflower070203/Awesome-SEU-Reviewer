@@ -1,0 +1,188 @@
+\documentclass[12pt,a4paper]{exampaper}
+\examname{信号与系统}
+\examsidebarfalse
+
+\begin{document}
+
+\examtitle{东南大学试卷}
+
+\vspace{0.8em}
+
+\begin{center}
+  \examfield[3.4cm]{课程名称}{信号与系统}\hspace{0.4em}%
+  \examfield[2.2cm]{课程代码}{}\hspace{0.4em}%
+  \examfield[1.8cm]{考试学期}{23-24-3}\\[0.4em]
+  \examfield[4.4cm]{适用专业}{}\hspace{0.4em}%
+  \examfield[2.0cm]{考试形式}{闭\hspace{0.5em}卷}\hspace{0.4em}%
+  \examfield[1.9cm]{考试时长}{120\hspace{0.4em}分钟}
+\end{center}
+
+\vspace{0.8em}
+
+\examscoretable[3]
+
+\vspace{0.6em}
+
+\examsection{单项选择题（本题共 10 小题，每小题 2 分，满分 20 分）}
+\begin{examquestions}
+  \examquestion 若 $e(t)$ 表示输入信号，$r(t)$ 表示输出信号，则下列描述错误的是：（　　）
+
+  A.\ $r(t)=te(t)$ 所描述的系统是线性的
+
+  B.\ $r(t)=e(2t)$ 所描述的系统是时不变的
+
+  C.\ $\dfrac{dr(t)}{dt}+r(t)=e(t+1)$ 所描述的系统是非因果的
+
+  D.\ $r(t)=\dfrac{de(t)}{dt}+e(t)$ 所描述的系统是线性的
+  \examquestion 下列关于信号的描述，错误的是：（　　）
+
+  A.\ 离散信号 $f(n)=\cos(n)$ 是一个周期信号
+
+  B.\ 连续信号 $f(t)=\cos(t)\times e^{-j\pi t}$ 是周期信号
+
+  C.\ 连续信号 $f(t)=\sin(1/t)$ 是一个能量信号
+
+  D.\ 周期信号一定不是能量信号
+  \examquestion 关于低通滤波器，以下论述不正确的是：（　　）
+
+  A.\ 理想低通滤波器的系统函数可以写成 $H(j\omega)=Ke^{-j\omega t_0}$，$|\omega|<\omega_c$
+
+  B.\ 如果将理想低通滤波器幅度频谱中截止区幅度大小由 $0$ 改为一个很小的正数，那么该滤波器就变成物理可实现滤波器了
+
+  C.\ 信号通过理想低通滤波器可以不发生失真
+
+  D.\ 要缩短低通滤波器阶跃响应的建立时间，可以增加该滤波器的通带宽度
+  \examquestion 关于线性时不变系统中零输入响应、零状态响应、强迫响应、自由响应之间的关系描述正确的有：（　　）
+
+  A.\ 零输入响应等于自由响应
+
+  B.\ 受迫响应等于零状态响应
+
+  C.\ 零输入响应必然属于自由响应
+
+  D.\ 零状态响应必然属于受迫响应
+  \examquestion 下列关于连续时间单位阶跃信号 $\varepsilon(t)$ 及连续时间单位冲激信号 $\delta(t)$ 的关系描述正确的是：（　　）
+
+  A.\ $\varepsilon(t)=\displaystyle\int_{-\infty}^{t}\delta(\tau)d\tau$
+
+  B.\ $\delta(-t)=\dfrac{d\varepsilon(-t)}{dt}$
+
+  C.\ $\varepsilon(t)=\displaystyle\int_{0}^{\infty}\delta(\tau-t)d\tau$
+
+  D.\ $\varepsilon(t)=\displaystyle\int_{-\infty}^{t}\delta(2\tau)d\tau$
+  \examquestion 已知信号 $f(t)$ 的波形如图 1 所示，信号 $g(t)=f(t)*f(t)$（符号“$*$”表示两信号相卷积），则 $g(1)=$（　　）
+
+  \begin{center}
+  \includegraphics[width=0.34\textwidth]{figures/signal/fig1-triangle-pulse.pdf}\\
+  \footnotesize 图 1
+  \end{center}
+
+  A.\ $1$ \qquad B.\ $\frac{1}{2}$ \qquad C.\ $\frac{1}{3}$ \qquad D.\ $\frac{1}{6}$
+  \examquestion 有一周期 $T=2$ 的信号如图 2 所示，请判断下面说法错误的是：（　　）
+
+  \begin{center}
+  \includegraphics[width=0.42\textwidth]{figures/signal/fig2-periodic-triangle.pdf}\\
+  \footnotesize 图 2
+  \end{center}
+
+  A.\ 该信号的傅里叶级数有直流分量
+
+  B.\ 该信号三角形式的傅里叶级数只有正弦分量
+
+  C.\ 该信号三角形式的傅里叶级数只有余弦分量
+
+  D.\ 该信号三角形式的傅里叶级数只有奇次谐波分量
+  \examquestion 信号 $f(t)=\sin(10t)$ 通过系统频率响应函数 $H(j\omega)=e^{-j2\omega}$ 的系统，则响应为：（　　）
+
+  A.\ $\sin(10t)\varepsilon(t)$
+
+  B.\ $\cos(10t-2)$
+
+  C.\ $\sin(10t-2)$
+
+  D.\ $\sin(10t-20)$
+  \examquestion 已知信号 $f(t)$ 的频宽为 $2\,\mathrm{MHz}$，则 $f(t)\times f(2t-1)$ 的频宽为（符号“$\times$”表示两信号相乘）：（　　）
+
+  A.\ $2\,\mathrm{MHz}$
+
+  B.\ $2.5\,\mathrm{MHz}$
+
+  C.\ $1.5\,\mathrm{MHz}$
+
+  D.\ $6\,\mathrm{MHz}$
+  \examquestion 关于调制与解调，以下说法错误的是：（　　）
+
+  A.\ 余弦调幅的过程就是频谱搬移的过程，可以将调制信号乘以作为载波的高频振荡即可实现
+
+  B.\ 常规幅度调制与抑制载频幅度调制相比，在传输过程中增加了载频分量，解调时无需造价昂贵的同步解调器，但同时功率利用率却降低了
+
+  C.\ 脉冲幅度调制的载波信号是周期脉冲信号，该载波信号的密度频谱是一系列幅度相等的冲激
+
+  D.\ 脉冲幅度调制解调时，如果调制信号为有限宽频信号，只要载波信号周期足够短，利用理想低通滤波器可以恢复调制信号
+\end{examquestions}
+
+\vspace{0.6em}
+
+\examsection{计算题（本题共 4 小题，满分 44 分）}
+\begin{examquestions}[0pt]
+  \examquestion 信号 $f(t)$ 如图 3 所示，其傅里叶变换为 $F(j\omega)$，求 $\displaystyle\int_{-\infty}^{\infty}\omega F(j\omega)\,d\omega$ 的值。
+
+  \begin{center}
+  \includegraphics[width=0.36\textwidth]{figures/signal/fig3-trapezoid.pdf}\\
+  \footnotesize 图 3
+  \end{center}
+  \examanswerspace{7cm}
+  \examquestion 某系统频率响应特性如图 4(a) 所示，当如图 4(b) 所示的周期性矩形脉冲信号 $f(t)$ 为激励时，求响应信号。
+
+  \begin{center}
+  \includegraphics[width=0.36\textwidth]{figures/signal/fig5a-lpf-magnitude.pdf}\\
+  \footnotesize 图 4(a)
+  \end{center}
+
+  \begin{center}
+  \includegraphics[width=0.40\textwidth]{figures/signal/fig5b-periodic-rect.pdf}\\
+  \footnotesize 图 4(b)
+  \end{center}
+  \examanswerspace{7cm}
+  \examquestion 求图 5 所示信号的傅里叶变换。
+
+  \begin{center}
+  \includegraphics[width=0.34\textwidth]{figures/signal/fig6-pulse.pdf}\\
+  \footnotesize 图 5
+  \end{center}
+  \examanswerspace{7cm}
+  \examquestion 已知调制信号 $e(t)=3\cos 10t+2\cos 20t$，载波信号 $c(t)=\cos 100t$，画出调幅波形 $s(t)=[e(t)+10]\cdot c(t)$ 的频谱图，求出载波功率、边带功率。
+  \examanswerspace{7cm}
+\end{examquestions}
+
+\vspace{0.6em}
+
+\examsection{简答题（本题共 2 小题，满分 31 分）}
+\begin{examquestions}[0pt]
+  \examquestion 一带限信号 $e(t)$ 的频谱 $E(j\omega)$ 如图 6(a) 所示，该信号通过如图 6(b) 所示的系统，其中理想低通滤波器的频率响应函数为 $H(j\omega)=\omega_c e^{-j\omega t_0}$（$\omega_c=15$，$t_0=\frac{\pi}{2}$）。试求：画出 $A$、$B$、$C$ 三点处的频谱图。
+
+  \begin{center}
+  \includegraphics[width=0.38\textwidth]{figures/signal/fig7a-spectrum.pdf}\\
+  \footnotesize 图 6(a)
+  \end{center}
+
+  \begin{center}
+  \includegraphics[width=0.78\textwidth]{figures/signal/fig7b-system-block.pdf}\\
+  \footnotesize 图 6(b)
+  \end{center}
+  \examanswerspace{10cm}
+  \examquestion 某 LTI 系统输入输出方程为 $\dfrac{d^2y(t)}{dt^2}+3\dfrac{dy(t)}{dt}+2y(t)=\dfrac{1}{2}x(t)+x(t)$，激励信号 $x(t)=\varepsilon(t)$。在 $t=0^-$ 时刻，系统状态为 $y(0^-)=1$，$y'(0^-)=1$。
+
+(1) 写出该系统的转移算子 $H(p)$；（4 分）
+
+(2) 求出该系统的冲激响应；（4 分）
+
+(3) 求出该系统的零输入响应；（4 分）
+
+(4) 求出该系统的零状态响应；（4 分）
+
+(5) 求出该系统的全响应。（3 分）
+  \examanswerspace{10cm}
+\end{examquestions}
+
+\end{document}

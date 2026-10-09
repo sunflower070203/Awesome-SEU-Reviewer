@@ -133,14 +133,24 @@ def section_title(type_key, group):
 
 
 def render_choice_options(q):
-    """选项串，以 \\qquad 分隔，供另起一行使用（不内联在题干尾部）。"""
+    """选项串。
+
+    q["options_per_line"] 控制每行放几个选项（默认 4）：
+      - 选项短（如 "0.6826"）→ 用默认 4，一行并排
+      - 选项长（含完整语句）→ 设为 1 或 2，避免超出页宽
+    多行时用空行分段，交给 LaTeX 自然排版。
+    """
     options = q.get("options") or []
     if not options:
         return ""
-    parts = []
-    for o in options:
-        parts.append(o["label"] + ".\\ " + o["latex"])
-    return " \\qquad ".join(parts)
+    per_line = int(q.get("options_per_line", 4)) or 4
+    parts = [o["label"] + ".\\ " + o["latex"] for o in options]
+    if per_line >= len(parts):
+        return " \\qquad ".join(parts)
+    rows = []
+    for i in range(0, len(parts), per_line):
+        rows.append(" \\qquad ".join(parts[i:i + per_line]))
+    return "\n\n  ".join(rows)
 
 
 def render_question(q, type_key):
