@@ -71,6 +71,34 @@ class TestRenderExam(unittest.TestCase):
         self.assertIn("\\examname{概率论}", out)
         self.assertIn("120\\hspace{0.4em}分钟", out)
 
+    def test_answer_space_after_every_question(self):
+        r"""留白必须跟在**每一题之后**（含最后一题），且第一题之前不留白。
+
+        回归测试：早期实现用 `\begin{examquestions}[7cm]`（即 \parskip），
+        结果留白错误地落在第一题之前、且最后一题之后没有留白。
+        """
+        out = render_exam({"questions": [
+            {"type": "calculation", "stem_latex": "题A", "score": 10},
+            {"type": "calculation", "stem_latex": "题B", "score": 10},
+        ]})
+        self.assertIn("\\begin{examquestions}[0pt]", out)
+        self.assertEqual(out.count("\\par\\vspace{7cm}"), 2)
+        self.assertNotIn("[7cm]", out)
+        # 留白必须紧跟在题干之后，而不是在 \examquestion 之前
+        body = out.split("\\begin{examquestions}[0pt]")[1]
+        first_line = body.strip().splitlines()[0]
+        self.assertTrue(first_line.startswith("\\examquestion"),
+                        f"第一行应是题干而非留白：{first_line!r}")
+
+    def test_no_answer_space_for_choice_and_fill(self):
+        """选择题/填空题不需要答题留白，用默认题间距。"""
+        out = render_exam({"questions": [
+            {"type": "choice", "stem_latex": "题", "options": [{"label": "A", "latex": "1"}], "score": 4},
+            {"type": "fill", "stem_latex": "题", "score": 4},
+        ]})
+        self.assertIn("\\begin{examquestions}\n", out)
+        self.assertNotIn("\\par\\vspace", out)
+
 
 if __name__ == "__main__":
     unittest.main(verbosity=2)

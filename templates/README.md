@@ -46,7 +46,7 @@ cp /tmp/upstream/exampaper.cls templates/exampaper.cls
 |---|---|
 | `\examsection{栏目标题}` | 大题标题，自动加「一、」「二、」并重置小题号 |
 | `\examquestion` | 小题编号（自动 1. 2. 3.…） |
-| `\begin{examquestions}[7cm] … \end{examquestions}` | 小题区，可选参数为**小题间距**（留答题空间） |
+| `\begin{examquestions}[7cm] … \end{examquestions}` | 小题区。参数是 `\parskip`（段间距）。⚠️ **不要用它留答题空间**：留白会错落在第一题之前，且最后一题之后不留白。改用每题后 `\par\vspace{...}`，详见 `references/question-types.md` |
 | `\begin{examproblem} … \end{examproblem}` | 无编号的单个大题 |
 | `\examfigure[0.6\textwidth]{图题}{图片路径}` | 插图并自动编号 |
 | `\examfield[宽度]{项目名}{内容}` | 抬头信息栏一项 |

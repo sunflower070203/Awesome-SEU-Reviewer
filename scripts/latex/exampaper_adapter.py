@@ -163,10 +163,23 @@ def render_question(q, type_key):
 
 
 def render_section(type_key, group):
+    """渲染一个大题栏（\\examsection + examquestions）。
+
+    答题留白用「每题后显式 \\par\\vspace{...}」而非环境的 \\parskip 参数。
+    原因（2026-10-09 实测）：\\parskip 只在**段落之间**生效，
+      - 环境体开头的换行/缩进会形成一个空段落，使间距错误地落在第一题之前；
+      - 最后一题之后没有后继段落，间距在文档末尾被丢弃 → 最后一题没有答题空间。
+    故：有留白需求的题型用 [0pt] 关掉 \\parskip，改为每题后显式 \\vspace。
+    """
     space = ANSWER_SPACE.get(type_key)
-    begin = f"\\begin{{examquestions}}[{space}]" if space else "\\begin{examquestions}"
-    body = "\n".join(render_question(q, type_key) for q in group)
-    return f"\\examsection{{{section_title(type_key, group)}}}\n{begin}\n{body}\n\\end{{examquestions}}"
+    lines = [f"\\examsection{{{section_title(type_key, group)}}}"]
+    lines.append("\\begin{examquestions}[0pt]" if space else "\\begin{examquestions}")
+    for q in group:
+        lines.append(render_question(q, type_key))
+        if space:
+            lines.append(f"  \\par\\vspace{{{space}}}")
+    lines.append("\\end{examquestions}")
+    return "\n".join(lines)
 
 
 def group_questions(questions):
