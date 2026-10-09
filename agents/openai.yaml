@@ -1,0 +1,65 @@
+# OpenAI Codex Skill 适配层
+# 用于 ~/.codex/skills/seu-review-helper/agents/openai.yaml
+
+skill:
+  name: seu-review-helper
+  display_name: SEU 复习助手
+  version: 0.1.0
+  description: |
+    从 PPT、拍照真题、复习笔记生成可编译的预测试卷。
+    内置 OCR pipeline、考点预测算法、LaTeX 模板生成、Overleaf 集成。
+  author: sunflower070203
+  license: MIT
+  homepage: https://github.com/sunflower070203/Awesome-SEU-Reviewer
+
+triggers:
+  keywords:
+    - 复习
+    - 考点
+    - 试卷
+    - 预测试卷
+    - OCR
+    - 手写
+    - 拍照版
+    - 真题
+    - 期末
+  intent_patterns:
+    - ".*生成.*试卷.*"
+    - ".*预测.*考点.*"
+    - ".*整理.*真题.*"
+    - ".*OCR.*"
+    - ".*会不会考.*"
+
+commands:
+  - name: ocr-image
+    description: 对单张/多张图片执行 OCR Pipeline，输出 LaTeX 格式题目
+    usage: "把 <image_path> 做 OCR"
+
+  - name: predict-topics
+    description: 从 PPT 和真题中提取关键词、预测考点、生成模拟题
+    usage: "用 <ppt_paths> 和 <past_exam_paths> 预测考点"
+
+  - name: render-latex
+    description: 把题目 JSON 转为 exampaper.cls 格式的 .tex 文件
+    usage: "把这些题排版成 LaTeX"
+
+  - name: compile-overleaf
+    description: 把 .tex 上传到 Overleaf 项目并编译下载 PDF
+    usage: "上传到 Overleaf 编译"
+
+dependencies:
+  python: ">=3.10"
+  external_tools:
+    - XeLaTeX（仅当本地编译时需要）
+
+config_files:
+  - path: ~/.config/seu-review-helper/ocr-providers.yaml
+    description: OCR provider 配置与凭据
+    required_for: [ocr-image]
+    example: assets/ocr-providers.example.yaml
+
+references:
+  - docs/review-helper-architecture.md
+  - references/question-types.md
+  - references/quality-rules.md
+  - references/chinese-handwriting-ocr.md

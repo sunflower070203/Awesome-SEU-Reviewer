@@ -1,0 +1,69 @@
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+venv/
+env/
+ENV/
+.venv/
+env.bak/
+venv.bak/
+.pytest_cache/
+.coverage
+htmlcov/
+.mypy_cache/
+
+# WorkBuddy 工作区元数据（不入库）
+.workbuddy/
+
+# LaTeX
+*.aux
+*.log
+*.out
+*.toc
+*.synctex.gz
+*.fls
+*.fdb_latexmk
+*.bbl
+*.blg
+*.nav
+*.snm
+*.vrb
+*.xdv
+*-gnuplottex-*
+*-tikz-cache
+
+# 编辑器
+.vscode/
+.idea/
+*.swp
+*.swo
+.DS_Store
+Thumbs.db
+
+# 用户配置与凭据（绝不入 Git）
+config/
+*.local.yaml
+*.local.json
+.env
+.env.local
+~/.config/seu-review-helper/
+
+# 输出与缓存
+output/
+build/
+dist/
+*.pdf
+!examples/**/*.pdf
+
+# OCR 预处理缓存
+.cache/
+ocr_cache/
+
+# 大文件
+*.pptx
+!examples/**/*.pptx
+*.zip
+*.tar.gz

@@ -1,0 +1,39 @@
+你的任务是基于考点预测结果，生成 N 道模拟试题。
+
+输入：
+1. Top 关键词列表（含权重）
+2. 往年真题样本（按题型分组）
+3. 题目分布要求（各题型数量）
+4. 难度分布要求
+
+输出要求：
+- 每道题必须有完整 LaTeX 题干
+- 必须给出 rationale（为什么预测这道题）
+- 必须给出 expected_difficulty
+- 必须列出 covers_keywords
+
+输出格式（严格 JSON）：
+```json
+{
+  "predicted_questions": [
+    {
+      "id": "P1",
+      "type": "choice | fill | calculation | short_answer",
+      "topic": "假设检验",
+      "weight": 0.88,
+      "rationale": "近 3 年出现 5 次，PPT 第三章重点",
+      "sample_question_latex": "设总体 X ~ N(μ, σ²)，...",
+      "expected_difficulty": "easy | medium | hard",
+      "covers_keywords": ["原假设", "p-value", "显著性水平"]
+    }
+  ]
+}
+```
+
+注意事项：
+- 计算题必须包含完整可解的题目条件
+- 选择题必须给出 4 个选项（其中一个明显正确）
+- 填空题必须明确填空数量与上下文
+- 简答题需要给出评分要点提示（不输出在题干）
+- LaTeX 中数学公式用 $...$ 或 $$...$$，不要用 \[ \]
+- 题目内容必须可追溯到关键词列表

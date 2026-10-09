@@ -1,0 +1,79 @@
+# OCR Provider 配置示例
+# 复制到 ~/.config/seu-review-helper/ocr-providers.yaml 并填入实际凭据
+
+providers:
+  handwriting:
+    # 手写体识别（连笔、涂抹场景）
+    active: tencent
+    available:
+      - tencent
+      - paddleocr_local
+      - llm_vision
+    credentials:
+      tencent:
+        secret_id: ${TENCENT_SECRET_ID}      # 环境变量
+        secret_key: ${TENCENT_SECRET_KEY}
+        endpoint: ocr.tencentcloudapi.com
+        region: ap-shanghai
+      paddleocr_local:
+        model_path: ~/.local/paddleocr/handwriting_v3/
+        use_gpu: false
+      llm_vision:
+        model: claude-sonnet-4  # 或 gpt-4-vision-preview
+        # 通过本地 Agent 调用，无需凭据
+
+  printed:
+    # 印刷体识别（拍照、扫描场景）
+    active: tencent
+    available:
+      - tencent
+      - baidu
+      - paddleocr_local
+    credentials:
+      tencent:
+        secret_id: ${TENCENT_SECRET_ID}
+        secret_key: ${TENCENT_SECRET_KEY}
+      baidu:
+        api_key: ${BAIDU_OCR_API_KEY}
+        secret_key: ${BAIDU_OCR_SECRET_KEY}
+
+  formula:
+    # 数学公式识别
+    active: mathpix
+    available:
+      - mathpix
+      - latex-ocr
+      - tencent_ocr
+    credentials:
+      mathpix:
+        app_id: ${MATHPIX_APP_ID}
+        app_key: ${MATHPIX_APP_KEY}
+      latex-ocr:
+        # 开源模型，本地部署
+        model_path: ~/.local/latex-ocr/
+
+# 预处理配置
+preprocess:
+  enabled: true
+  steps:
+    deskew: true                  # 倾斜校正
+    adaptive_threshold: true      # 自适应二值化
+    shadow_removal: true          # 去除阴影
+    super_resolution: true        # Real-ESRGAN 超分（处理模糊）
+    perspective_correct: true     # 透视校正
+  super_resolution_model: ~/.local/realesrgan/
+
+# 输出配置
+output:
+  format: latex                   # latex | json | both
+  include_confidence: true
+  mark_needs_review_threshold: 0.7  # 低于此置信度标记 needs_review
+
+# 三路投票配置（手写场景）
+voting:
+  enabled: true
+  channels:
+    - tencent
+    - paddleocr_local
+    - llm_vision
+  consensus_threshold: 0.6        # 编辑距离相似度阈值

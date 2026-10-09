@@ -1,0 +1,79 @@
+# WorkBuddy Skill 适配层
+# 由 WorkBuddy 通过 SkillManage 自动加载
+
+skill:
+  id: seu-review-helper
+  name: SEU 复习助手
+  version: 0.1.0
+  category: 教育/学习
+  tags:
+    - 复习
+    - 期末考试
+    - OCR
+    - LaTeX
+    - Overleaf
+    - 东南大学
+
+description: |
+  从 PPT、拍照真题、复习笔记生成可编译的预测试卷。
+  内置 OCR pipeline（手写/拍照/公式电路）、考点预测算法、LaTeX 模板生成、Overleaf 集成。
+  支持学生本地 Agent 自主调度，不强制端到端流程。
+
+triggers:
+  keywords:
+    - 复习
+    - 考点
+    - 试卷
+    - 预测
+    - OCR
+    - 手写
+    - 拍照
+    - 真题
+    - 期末
+    - exampaper
+  intent_examples:
+    - "我手头有 PPT 和拍照版真题，帮我生成预测试卷"
+    - "这张手写卷子能 OCR 吗"
+    - "用 exampaper 模板排版这套题"
+    - "今年期末会考什么"
+
+entry_points:
+  - name: ocr
+    description: OCR Pipeline
+    input_type: image_path
+    output_type: questions_json
+
+  - name: predict
+    description: 考点预测
+    input_type: corpus_paths
+    output_type: predictions_json
+
+  - name: render
+    description: LaTeX 试卷生成
+    input_type: questions_json
+    output_type: tex_file
+
+  - name: compile
+    description: Overleaf 编译
+    input_type: overleaf_url + tex_content
+    output_type: pdf_file
+
+dependencies:
+  python: ">=3.10"
+  preferred_runtime:
+    python: C:/Users/Sunny/.workbuddy/binaries/python/versions/3.13.12/python.exe
+  external_skills:
+    - overleaf-webbridge-check  # Skill D 依赖
+
+config:
+  ocr_providers_path: ~/.config/seu-review-helper/ocr-providers.yaml
+  exam_template_path: templates/exampaper.cls
+
+references:
+  - docs/review-helper-architecture.md
+  - references/question-types.md
+  - references/quality-rules.md
+  - references/chinese-handwriting-ocr.md
+
+homepage: https://github.com/sunflower070203/Awesome-SEU-Reviewer
+license: MIT

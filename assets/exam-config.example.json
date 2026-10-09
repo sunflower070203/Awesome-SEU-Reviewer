@@ -1,0 +1,55 @@
+{
+  "exam_meta": {
+    "course_name": "概率论与数理统计",
+    "course_code": "ST203",
+    "semester": "2025-2026-2",
+    "major": "信息工程",
+    "exam_type": "闭卷",
+    "duration_minutes": 120,
+    "exam_title": "期末考试(A 卷)",
+    "exam_date": "2026-06-15"
+  },
+
+  "question_distribution": {
+    "choice": {
+      "count": 5,
+      "score_each": 4,
+      "total_score": 20
+    },
+    "fill": {
+      "count": 5,
+      "score_each": 4,
+      "total_score": 20
+    },
+    "calculation": {
+      "count": 4,
+      "score_each": 10,
+      "total_score": 40
+    },
+    "short_answer": {
+      "count": 2,
+      "score_each": 10,
+      "total_score": 20
+    }
+  },
+
+  "options": {
+    "include_answer_sheet": false,
+    "include_score_table": true,
+    "score_table_columns": 6,
+    "answer_space_calculation": "7cm",
+    "answer_space_fill": "2cm",
+    "two_column_layout": false,
+    "sidebar_seal_line": true
+  },
+
+  "constraints": {
+    "difficulty_distribution": {
+      "easy": 0.3,
+      "medium": 0.5,
+      "hard": 0.2
+    },
+    "must_include_topics": ["第三章", "假设检验"],
+    "exclude_topics": []
+  }
+}
