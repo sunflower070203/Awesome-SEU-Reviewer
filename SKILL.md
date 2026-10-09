@@ -211,7 +211,18 @@ python scripts/ocr/render.py --input exam.pdf --outdir .tmp-render
 python scripts/ocr/render.py --input scans/ --outdir .tmp-render      # 目录批量
 ```
 
-产出 `.tmp-render/*.png` 与 `manifest.json`（含每页尺寸与文本层字符数）。
+产出 `.tmp-render/*.png` 与 `manifest.json`（含每页尺寸、文本层字符数与所用档位）。
+
+**渲染档位：默认 `quality`（2.0×）——质量优先，不要为了省 token 牺牲识别率。**
+只有确认输入足够清晰（电子版 PDF、矢量原生）时才降到 `fast`。
+
+| 档位 | 倍率 | 适用 | 相对成本 |
+|---|---|---|---|
+| `quality`（默认） | 2.0× | 手机拍屏、手写、复杂公式 | 基准 |
+| `balanced` | 1.5× | 清晰扫描件 | Claude 类省 ~44% |
+| `fast` | 1.0× | 电子版 PDF | OpenAI 省 ~31% / Claude 省 ~75% |
+
+详见 `docs/token-optimization.md`。
 
 ```jsonc
 // 第 2 步：Agent 用视觉能力读取 PNG，按 assets/prompt-templates/vision-extract.txt

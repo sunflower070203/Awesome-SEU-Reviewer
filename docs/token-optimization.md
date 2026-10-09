@@ -102,20 +102,41 @@ python scripts/ocr/render.py --input page3.pdf --outdir .tmp-render --scale 1.5
 
 ## 四、推荐配置
 
-```bash
-# 电子版 PDF（最常见）
-python scripts/ocr/render.py --input exam.pdf --outdir .tmp-render --scale 1.0
+**默认策略：质量优先。** `render.py` 的默认档位是 `quality`（2.0×），
+降档必须显式指定——宁可多花 token，也不要识别错题目。
 
-# 手拍件
-python scripts/ocr/render.py --input photos/ --outdir .tmp-render --scale 1.5
+```bash
+# 默认（质量优先，推荐用于一切正式场景）
+python scripts/ocr/render.py --input exam.pdf --outdir .tmp-render
+
+# 明确的档位选择
+python scripts/ocr/render.py --input exam.pdf --outdir .tmp-render --profile fast      # 1.0x
+python scripts/ocr/render.py --input exam.pdf --outdir .tmp-render --profile balanced  # 1.5x
 ```
 
-预期单份试卷（6 页）的**图片成本**：
+### 什么时候值得降档
 
-- 电子版（1.0×）：OpenAI ≈ 4590 / Claude ≈ 4020
-- 手拍件（1.5×）：OpenAI ≈ 6630 / Claude ≈ 9000
+只有在**质量没有实际损失**的前提下才降——即输入本身足够清晰：
+
+| 场景 | 建议档位 | 理由 |
+|---|---|---|
+| 电子版 PDF（矢量原生，字迹锐利） | `fast` 1.0× | 1.0× 仍有 596×842，足够辨认 |
+| 清晰扫描件 | `balanced` 1.5× | 保险起见留一档 |
+| **手机拍的屏幕/纸张** | **`quality` 2.0×** | 透视变形 + 反光 + 手写，必须高保真 |
+| 含复杂公式、密集下标 | `quality` 2.0× | 分块或缩放下标易糊 |
+
+### 预期成本（单份 6 页试卷的图片部分）
+
+| 档位 | OpenAI | Claude |
+|---|---|---|
+| quality 2.0× | 6630 | 16050 |
+| balanced 1.5× | 6630 | 9018 |
+| fast 1.0× | 4590 | 4020 |
 
 再算上系统提示、技能文档（`SKILL.md` ≈ 4k token）与工具返回，**一次完整任务的量级在 15k–40k token**，具体取决于 Agent 每轮是否重读技能文档。
+
+> **取舍原则**：识别错误导致的返工（重新读图、人工核对、改题）通常**比省下的 token 更贵**。
+> 所以默认高质量，只在确认输入清晰时才降档。
 
 ## 五、对多 Agent 对比的意义
 
