@@ -9,7 +9,7 @@
 | 选择题 | `choice` | `\examquestion` + 自定义选项 | 4 个选项，1 个正确答案 |
 | 填空题 | `fill` | `\examquestion` + `\underline` | 题干含 `\underline{\hspace{2cm}}` |
 | 计算题 | `calculation` | `\examquestion` | 完整数学表达式 |
-| 简答题 | `short_answer` | `\examquestion` + 每题后 `\par\vspace{10cm}` | 题后留答题空间（见下文「答题空间」） |
+| 简答题 | `short_answer` | `\examquestion` + 每题后 `\examanswerspace{10cm}` | 题后留答题空间（见下文「答题空间」） |
 | 图像题 | `image_question` | `\examfigure` | 题干含图，图自动编号 |
 | 电路题 | `circuit_question` | `\examfigure` + 占位 | 保留原图占位 |
 
@@ -90,21 +90,23 @@
 
 ## 答题空间
 
+留白用模板命令 **`\examanswerspace{<长度>}`**（`exampaper.cls` v0.2 起提供）。
+
 **不要**用 `\begin{examquestions}[7cm]` 的参数留白。该参数是 `\parskip`（段间距），
-只在段落**之间**生效，会导致两个错误（2026-10-09 实测）：
+只在段落**之间**生效，会导致两个反直觉的错误（2026-10-09 实机验证）：
 
 - 留白落在**第一题之前**（环境体开头的空白形成空段落）
 - **最后一题之后没有留白**（后面没有段落，间距在文档末尾被丢弃）
 
-正确写法是每题之后显式换段再留白：
+正确写法：
 
 ```latex
 \examsection{计算题（本题共 2 小题，每小题 12 分，满分 24 分）}
-\begin{examquestions}[0pt]
+\begin{examquestions}[0pt]          % 0pt：关闭 \parskip，逐题显式留白
   \examquestion 题一
-  \par\vspace{7cm}
+  \examanswerspace{7cm}
   \examquestion 题二
-  \par\vspace{7cm}
+  \examanswerspace{7cm}             % 最后一题同样有留白
 \end{examquestions}
 ```
 
@@ -113,8 +115,11 @@
 | 题型 | 每题后留白 |
 |---|---|
 | 选择题、填空题 | 无（用 `\begin{examquestions}` 默认 13pt 题间距） |
-| 计算题 | `\par\vspace{7cm}` |
-| 简答题、证明题 | `\par\vspace{10cm}` / `8cm` |
-| 图/电路题 | `\par\vspace{6cm}` |
+| 计算题 | `\examanswerspace{7cm}` |
+| 简答题、证明题 | `\examanswerspace{10cm}` / `8cm` |
+| 图/电路题 | `\examanswerspace{6cm}` |
 
 `exampaper_adapter.py` 已按此规则生成（见 `ANSWER_SPACE` 常量）。
+
+> 兼容性：`\examanswerspace` 定义在 `templates/exampaper.cls`（本仓库内置副本）中，
+> 等价于 `\par\vspace{#1}`。若学生替换成自己的旧版模板，需确保该命令存在。

@@ -45,15 +45,21 @@ class TestRenderExam(unittest.TestCase):
         self.assertLess(out.index("填空题"), out.index("单项选择题"))
         self.assertIn("本题共 2 小题，每小题 4 分，满分 8 分", out)
 
-    def test_choice_options_inline(self):
-        """选项必须内联渲染，不得使用 enumerate。"""
+    def test_choice_options_on_own_line(self):
+        r"""选项另起一行、与题干分开；不使用 enumerate。"""
         out = render_exam({"questions": [
             {"type": "choice", "stem_latex": "题干",
              "options": [{"label": "A", "latex": "$1$"}, {"label": "B", "latex": "$2$"}],
              "score": 4}
         ]})
-        self.assertIn("\\quad A.\\ $1$ \\quad B.\\ $2$", out)
         self.assertNotIn("enumerate", out)
+        self.assertIn("A.\\ $1$ \\qquad B.\\ $2$", out)
+
+        body = out.split("\\begin{examquestions}")[1]
+        lines = [ln.strip() for ln in body.splitlines() if ln.strip()]
+        self.assertTrue(lines[0].startswith("\\examquestion 题干"), lines[0])
+        self.assertNotIn("A.\\ $1$", lines[0], "选项不得内联在题干行")
+        self.assertIn("A.\\ $1$", lines[1], "选项应独占一行")
 
     def test_seal_line_disabled(self):
         out = render_exam({
@@ -82,7 +88,7 @@ class TestRenderExam(unittest.TestCase):
             {"type": "calculation", "stem_latex": "题B", "score": 10},
         ]})
         self.assertIn("\\begin{examquestions}[0pt]", out)
-        self.assertEqual(out.count("\\par\\vspace{7cm}"), 2)
+        self.assertEqual(out.count("\\examanswerspace{7cm}"), 2)
         self.assertNotIn("[7cm]", out)
         # 留白必须紧跟在题干之后，而不是在 \examquestion 之前
         body = out.split("\\begin{examquestions}[0pt]")[1]
@@ -97,7 +103,7 @@ class TestRenderExam(unittest.TestCase):
             {"type": "fill", "stem_latex": "题", "score": 4},
         ]})
         self.assertIn("\\begin{examquestions}\n", out)
-        self.assertNotIn("\\par\\vspace", out)
+        self.assertNotIn("\\examanswerspace", out)
 
 
 if __name__ == "__main__":

@@ -133,13 +133,14 @@ def section_title(type_key, group):
 
 
 def render_choice_options(q):
+    """选项串，以 \\qquad 分隔，供另起一行使用（不内联在题干尾部）。"""
     options = q.get("options") or []
     if not options:
         return ""
-    rendered = []
+    parts = []
     for o in options:
-        rendered.append("\\quad " + o["label"] + ".\\ " + o["latex"])
-    return " ".join(rendered)
+        parts.append(o["label"] + ".\\ " + o["latex"])
+    return " \\qquad ".join(parts)
 
 
 def render_question(q, type_key):
@@ -147,8 +148,11 @@ def render_question(q, type_key):
     lines = []
 
     if type_key == "choice":
+        lines.append(f"  \\examquestion {stem}")
         suffix = render_choice_options(q)
-        lines.append(f"  \\examquestion {stem} {suffix}".rstrip())
+        if suffix:
+            lines.append("")          # 空行 => \par：选项与题干分成两段，不内联
+            lines.append(f"  {suffix}")
     elif q.get("has_image") or q.get("image_path"):
         lines.append(f"  \\examquestion {stem}")
         img = q.get("image_path", "")
@@ -165,11 +169,10 @@ def render_question(q, type_key):
 def render_section(type_key, group):
     """渲染一个大题栏（\\examsection + examquestions）。
 
-    答题留白用「每题后显式 \\par\\vspace{...}」而非环境的 \\parskip 参数。
-    原因（2026-10-09 实测）：\\parskip 只在**段落之间**生效，
-      - 环境体开头的换行/缩进会形成一个空段落，使间距错误地落在第一题之前；
-      - 最后一题之后没有后继段落，间距在文档末尾被丢弃 → 最后一题没有答题空间。
-    故：有留白需求的题型用 [0pt] 关掉 \\parskip，改为每题后显式 \\vspace。
+    答题留白用模板的 \\examanswerspace{...}（每题之后调用一次），而不是
+    \\begin{examquestions}[...] 的参数。后者是 \\parskip（段间距），只在段落
+    **之间**生效，会造成「留白跑到第一题之前、最后一题之后反而没有留白」
+    （2026-10-09 实测）。故有留白需求的题型用 [0pt] 关掉 \\parskip，逐题显式留白。
     """
     space = ANSWER_SPACE.get(type_key)
     lines = [f"\\examsection{{{section_title(type_key, group)}}}"]
@@ -177,7 +180,7 @@ def render_section(type_key, group):
     for q in group:
         lines.append(render_question(q, type_key))
         if space:
-            lines.append(f"  \\par\\vspace{{{space}}}")
+            lines.append(f"  \\examanswerspace{{{space}}}")
     lines.append("\\end{examquestions}")
     return "\n".join(lines)
 
