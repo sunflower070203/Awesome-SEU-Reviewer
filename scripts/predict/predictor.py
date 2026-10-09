@@ -21,6 +21,7 @@ import json
 import re
 import sys
 from collections import Counter
+from pathlib import Path
 
 DEFAULT_THRESHOLD = 0.5
 WEIGHT_REPEAT = 0.75
@@ -117,6 +118,34 @@ def score_cluster(cluster, n_exams):
     }
 
 
+def load_pool(paths):
+    """把若干份 JSON 合并成试卷池。
+
+    兼容两种输入（方便直接接 Skill A 的视觉提取产物）：
+      1) 池格式：{"exams": [{"id", "questions": [...]}]}
+      2) 单卷格式：{"exam_id": "...", "questions": [...]}   ← vision-extract.txt 的输出
+    """
+    exams = []
+    for p in paths:
+        with open(p, encoding="utf-8") as f:
+            d = json.load(f)
+        if "exams" in d:
+            exams.extend(d["exams"])
+        elif "questions" in d:
+            exams.append({
+                "id": d.get("exam_id") or Path(p).stem,
+                "label": d.get("label", ""),
+                "questions": d["questions"],
+            })
+        else:
+            raise ValueError(
+                "无法识别的输入格式（既无 exams 也无 questions）：" + str(p)
+            )
+    if not exams:
+        raise ValueError("没有加载到任何试卷")
+    return {"exams": exams}
+
+
 def detect_mode(data):
     """按实际提供的资料判定模式——试卷与课件不是二选一的关系。
 
@@ -168,32 +197,102 @@ def predict(data, threshold=DEFAULT_THRESHOLD):
     }
 
 
+def apply_merge(data, merged):
+    """按「考点归并」结果重新计算信号强度。
+
+    统计聚类只能识别「几乎相同的题」，无法识别「同考点、不同措辞」。
+    归并由 Agent（LLM）按 references/topic-merge.md 的规范完成，产出：
+
+        {"topics": [
+            {"label": "绝对值函数的二重积分",
+             "members": [{"exam": "2023-24", "number": 4, "type": "fill"}, ...],
+             "rationale": "（可选，Agent 写的依据）"}
+        ]}
+
+    本函数只做「按归并结果重新打分」，不参与语义判断。
+    """
+    exams = data.get("exams") or []
+    n = len(exams)
+    topics = merged.get("topics") or []
+    if not topics:
+        raise ValueError("归并结果为空：merged['topics'] 至少需要一项")
+    if n == 0:
+        raise ValueError("缺少 exams，无法按卷数计算重复度")
+
+    results = []
+    for t in topics:
+        members = t.get("members") or []
+        exams_seen = {m["exam"] for m in members}
+        repeat = len(exams_seen) / n
+
+        positions = Counter((m.get("type", "unknown"), m.get("number")) for m in members)
+        top_count = positions.most_common(1)[0][1] if positions else 0
+        stability = top_count / len(members) if members else 0.0
+
+        score = WEIGHT_REPEAT * repeat + WEIGHT_POSITION * stability
+        results.append({
+            "rank": 0,
+            "topic": t.get("label", "(未命名)"),
+            "score": round(score, 3),
+            "repeat": round(repeat, 3),
+            "exams_seen": sorted(exams_seen),
+            "position_stability": round(stability, 3),
+            "positions": {"{}#{}".format(k[0], k[1]): v for k, v in positions.items()},
+            "n_members": len(members),
+            "rationale": t.get("rationale") or build_rationale(
+                repeat, n, sorted(exams_seen), stability, positions),
+        })
+
+    results.sort(key=lambda x: (-x["score"], -x["n_members"]))
+    for i, r in enumerate(results, 1):
+        r["rank"] = i
+
+    return {
+        "mode": "merged",
+        "n_exams": n,
+        "exam_ids": [e["id"] for e in exams],
+        "source": "llm-topic-merge",
+        "predictions": results,
+    }
+
+
 def format_text(result):
     lines = [
         "试卷数：{}（{}）".format(result["n_exams"], ", ".join(result["exam_ids"])),
-        "相似度阈值：{}".format(result["threshold"]),
-        "",
     ]
+    if result.get("mode") == "merged":
+        lines.append("来源：LLM 考点归并")
+    else:
+        lines.append("相似度阈值：{}".format(result.get("threshold")))
+    lines.append("")
     for p in result["predictions"]:
-        lines.append("[{}] 信号 {:.3f}  {}".format(p["rank"], p["score"], p["type"]))
+        label = p.get("topic") or p.get("type")
+        lines.append("[{}] 信号 {:.3f}  {}".format(p["rank"], p["score"], label))
         lines.append("     依据：{}".format(p["rationale"]))
-        lines.append("     样例：{}".format(p["stem_samples"][0][:70]))
+        if p.get("stem_samples"):
+            lines.append("     样例：{}".format(p["stem_samples"][0][:70]))
         lines.append("")
     return "\n".join(lines)
 
 
 def main():
     ap = argparse.ArgumentParser(description="预测考点（Skill B）")
-    ap.add_argument("--input", required=True, help="试卷池 JSON")
+    ap.add_argument("--input", required=True, action="append",
+                    help="试卷 JSON；可多次指定（池格式或单卷格式均可）")
     ap.add_argument("--output", help="输出 JSON（缺省写到 stdout）")
     ap.add_argument("--threshold", type=float, default=DEFAULT_THRESHOLD, help="聚类相似度阈值")
+    ap.add_argument("--merge", help="LLM 考点归并结果 JSON（提供后按考点重新打分）")
     ap.add_argument("--format", choices=["json", "text"], default="json")
     args = ap.parse_args()
 
-    with open(args.input, encoding="utf-8") as f:
-        data = json.load(f)
+    data = load_pool(args.input)
 
-    result = predict(data, args.threshold)
+    if args.merge:
+        with open(args.merge, encoding="utf-8") as f:
+            merged = json.load(f)
+        result = apply_merge(data, merged)
+    else:
+        result = predict(data, args.threshold)
 
     if args.format == "text":
         rendered = format_text(result)

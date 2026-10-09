@@ -1,0 +1,121 @@
+{
+  "note": "示例：LLM 考点归并结果（由 Agent 按 references/topic-merge.md 产出）。只含考点名与成员引用，不含题目原文。",
+  "topics": [
+    {
+      "label": "空间直线与平面的位置关系",
+      "members": [
+        {"exam": "2023-24", "number": 1, "type": "fill"},
+        {"exam": "2024-25", "number": 1, "type": "fill"}
+      ],
+      "rationale": "两卷第 1 题都考空间直线之间的垂直/夹角关系，仅给定形式不同"
+    },
+    {
+      "label": "空间曲面/曲线的切平面与切线",
+      "members": [
+        {"exam": "2023-24", "number": 2, "type": "fill"},
+        {"exam": "2024-25", "number": 2, "type": "fill"}
+      ],
+      "rationale": "一卷求曲面切平面、一卷求曲线切线，同属切对象求解"
+    },
+    {
+      "label": "偏导数与全微分",
+      "members": [
+        {"exam": "2023-24", "number": 3, "type": "fill"},
+        {"exam": "2024-25", "number": 3, "type": "fill"}
+      ],
+      "rationale": "一卷考复合函数全微分，一卷考隐式偏导，同属偏导计算"
+    },
+    {
+      "label": "绝对值函数的二重积分",
+      "members": [
+        {"exam": "2023-24", "number": 4, "type": "fill"},
+        {"exam": "2024-25", "number": 4, "type": "fill"}
+      ],
+      "rationale": "两年都在第 4 题考绝对值二重积分，仅被积函数由 |y-√x| 变为 |x+y|"
+    },
+    {
+      "label": "曲线积分与曲线几何量（形心）",
+      "members": [
+        {"exam": "2023-24", "number": 5, "type": "fill"},
+        {"exam": "2024-25", "number": 5, "type": "fill"}
+      ],
+      "rationale": "一卷考第一类曲线积分、一卷考形心，都需要曲线的弧长积分"
+    },
+    {
+      "label": "曲面积分与曲面面积",
+      "members": [
+        {"exam": "2023-24", "number": 6, "type": "fill"},
+        {"exam": "2024-25", "number": 6, "type": "fill"}
+      ],
+      "rationale": "一卷考第一类曲面积分、一卷考曲面面积，同属曲面微元积分"
+    },
+    {
+      "label": "路径无关与全微分求原函数",
+      "members": [
+        {"exam": "2023-24", "number": 7, "type": "fill"},
+        {"exam": "2024-25", "number": 7, "type": "fill"}
+      ],
+      "rationale": "一卷由路径无关求参数、一卷由全微分求原函数，同属微分形式的可积性"
+    },
+    {
+      "label": "幂级数",
+      "members": [
+        {"exam": "2023-24", "number": 8, "type": "fill"},
+        {"exam": "2024-25", "number": 8, "type": "fill"}
+      ],
+      "rationale": "一卷求收敛域、一卷求系数极限，都依赖幂级数收敛半径"
+    },
+    {
+      "label": "Fourier 级数的和函数",
+      "members": [
+        {"exam": "2023-24", "number": 9, "type": "fill"},
+        {"exam": "2024-25", "number": 9, "type": "fill"}
+      ],
+      "rationale": "两年都在第 9 题考 Fourier 级数和函数在某点的值"
+    },
+    {
+      "label": "重积分的物理应用（质心/转动惯量）",
+      "members": [
+        {"exam": "2023-24", "number": 2, "type": "calculation"},
+        {"exam": "2024-25", "number": 2, "type": "calculation"}
+      ],
+      "rationale": "一卷求质心、一卷求转动惯量，同属三重积分的物理量计算"
+    },
+    {
+      "label": "多元函数的极值与最值",
+      "members": [
+        {"exam": "2023-24", "number": 1, "type": "calculation"},
+        {"exam": "2024-25", "number": 1, "type": "calculation"}
+      ],
+      "rationale": "一卷由全微分求原函数再求域上最值、一卷由梯度条件求切点，都需求多元函数极值"
+    },
+    {
+      "label": "级数的敛散性判定",
+      "members": [
+        {"exam": "2023-24", "number": 4, "type": "calculation"},
+        {"exam": "2024-25", "number": 3, "type": "calculation"}
+      ],
+      "rationale": "两卷各有一道判别级数敛散性的计算题"
+    },
+    {
+      "label": "第二类曲线积分与曲面积分",
+      "members": [
+        {"exam": "2023-24", "number": 6, "type": "short_answer"},
+        {"exam": "2023-24", "number": 7, "type": "short_answer"},
+        {"exam": "2024-25", "number": 6, "type": "short_answer"},
+        {"exam": "2024-25", "number": 7, "type": "short_answer"}
+      ],
+      "rationale": "两卷各有一道空间曲线积分与一道曲面积分大题，均用 Stokes/Gauss 公式"
+    },
+    {
+      "label": "函数项级数一致收敛与级数证明",
+      "members": [
+        {"exam": "2023-24", "number": 8, "type": "proof"},
+        {"exam": "2023-24", "number": 9, "type": "proof"},
+        {"exam": "2024-25", "number": 8, "type": "proof"},
+        {"exam": "2024-25", "number": 9, "type": "proof"}
+      ],
+      "rationale": "两卷各有一道一致收敛证明与一道级数命题证明"
+    }
+  ]
+}

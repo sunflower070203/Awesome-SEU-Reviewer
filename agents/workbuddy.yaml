@@ -1,79 +1,92 @@
 # WorkBuddy Skill 适配层
-# 由 WorkBuddy 通过 SkillManage 自动加载
-
 skill:
   id: seu-review-helper
   name: SEU 复习助手
-  version: 0.1.0
+  version: 0.2.0
   category: 教育/学习
-  tags:
-    - 复习
-    - 期末考试
-    - OCR
-    - LaTeX
-    - Overleaf
-    - 东南大学
+  tags: [复习, 期末考试, 考点预测, 真题整理, LaTeX, Overleaf, 东南大学]
 
 description: |
-  从 PPT、拍照真题、复习笔记生成可编译的预测试卷。
-  内置 OCR pipeline（手写/拍照/公式电路）、考点预测算法、LaTeX 模板生成、Overleaf 集成。
-  支持学生本地 Agent 自主调度，不强制端到端流程。
+  从历年真题（PDF/照片/扫描件）与课件生成复习预测试卷。
+  试卷转结构化题目用的是「渲染成图 + 视觉识别」，能还原公式；
+  考点预测用的是「跨卷重复度 + 位置稳定性」，每一步都给出可读的依据。
+  视觉识别与考点归并都由 Agent 自身完成，不需要外部 API key。
 
 triggers:
   keywords:
     - 复习
     - 考点
-    - 试卷
     - 预测
-    - OCR
-    - 手写
-    - 拍照
+    - 试卷
     - 真题
     - 期末
+    - OCR
+    - 拍照
+    - 扫描
+    - LaTeX
+    - overleaf
     - exampaper
+    - 会不会考
   intent_examples:
-    - "我手头有 PPT 和拍照版真题，帮我生成预测试卷"
-    - "这张手写卷子能 OCR 吗"
-    - "用 exampaper 模板排版这套题"
-    - "今年期末会考什么"
+    - "我有几份历年真题，帮我预测今年考点并出一套卷子"
+    - "这份扫描版试卷能识别成 LaTeX 吗"
+    - "用 exampaper 模板把我整理的题排版成 PDF"
+    - "用前两年的卷子预测下一年的"
 
 entry_points:
-  - name: ocr
-    description: OCR Pipeline
-    input_type: image_path
+  - name: render
+    description: 试卷转结构化题目（第一步：渲染成 PNG）
+    script: scripts/ocr/render.py
+    input_type: pdf_or_image
+    output_type: png_manifest
+
+  - name: extract
+    description: 视觉提取（第二步：Agent 读图产出 questions JSON）
+    spec: assets/prompt-templates/vision-extract.txt
+    input_type: png_manifest
     output_type: questions_json
 
   - name: predict
-    description: 考点预测
-    input_type: corpus_paths
+    description: 考点预测（统计聚类 → Agent 归并 → 重新打分）
+    script: scripts/predict/predictor.py
+    spec: references/topic-merge.md
+    input_type: questions_json (可多份)
     output_type: predictions_json
 
-  - name: render
-    description: LaTeX 试卷生成
+  - name: typeset
+    description: 生成 LaTeX 试卷
+    script: scripts/latex/exampaper_adapter.py
     input_type: questions_json
     output_type: tex_file
 
   - name: compile
-    description: Overleaf 编译
-    input_type: overleaf_url + tex_content
+    description: Overleaf 编译并取回 PDF
+    spec: references/overleaf-workflow.md
+    input_type: tex_file
     output_type: pdf_file
 
 dependencies:
-  python: ">=3.10"
-  preferred_runtime:
-    python: C:/Users/Sunny/.workbuddy/binaries/python/versions/3.13.12/python.exe
+  python: ">=3.9"
+  packages:
+    required: []
+    optional: [pypdfium2, pillow]  # 仅渲染/预览需要
   external_skills:
-    - overleaf-webbridge-check  # Skill D 依赖
+    - overleaf-webbridge-check  # 仅 Overleaf 编译环节需要
 
-config:
-  ocr_providers_path: ~/.config/seu-review-helper/ocr-providers.yaml
-  exam_template_path: templates/exampaper.cls
+cost_profile:
+  api_calls: none           # 不调用任何外部 API
+  agent_vision: required    # 视觉识别由 Agent 自身完成
+  notes: |
+    全流程零 API 费用。PDF 渲染与打分是本地 Python（秒级、无网络）。
+    视觉识别与考点归并消耗 Agent 自身额度，可通过「只处理需要的页面」进一步压降。
 
 references:
+  - SKILL.md
   - docs/review-helper-architecture.md
+  - docs/backtest-report.md
   - references/question-types.md
-  - references/quality-rules.md
-  - references/chinese-handwriting-ocr.md
+  - references/topic-merge.md
+  - references/overleaf-workflow.md
 
 homepage: https://github.com/sunflower070203/Awesome-SEU-Reviewer
 license: MIT

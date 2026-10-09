@@ -1,65 +1,68 @@
 # OpenAI Codex Skill 适配层
-# 用于 ~/.codex/skills/seu-review-helper/agents/openai.yaml
-
+# 安装位置：~/.codex/skills/seu-review-helper/agents/openai.yaml
 skill:
   name: seu-review-helper
   display_name: SEU 复习助手
-  version: 0.1.0
+  version: 0.2.0
   description: |
-    从 PPT、拍照真题、复习笔记生成可编译的预测试卷。
-    内置 OCR pipeline、考点预测算法、LaTeX 模板生成、Overleaf 集成。
+    从历年真题（PDF/照片/扫描件）与课件生成复习预测试卷。
+    试卷转结构化题目用「渲染成图 + 视觉识别」，能还原公式；
+    考点预测用「跨卷重复度 + 位置稳定性」，每一步都给出可读依据。
   author: sunflower070203
   license: MIT
   homepage: https://github.com/sunflower070203/Awesome-SEU-Reviewer
 
 triggers:
-  keywords:
-    - 复习
-    - 考点
-    - 试卷
-    - 预测试卷
-    - OCR
-    - 手写
-    - 拍照版
-    - 真题
-    - 期末
+  keywords: [复习, 考点, 预测, 试卷, 真题, 期末, OCR, 拍照, 扫描, LaTeX, overleaf]
   intent_patterns:
-    - ".*生成.*试卷.*"
-    - ".*预测.*考点.*"
-    - ".*整理.*真题.*"
-    - ".*OCR.*"
+    - ".*(生成|出|做).*试卷.*"
+    - ".*预测.*(考点|重点).*"
+    - ".*整理.*(真题|试卷).*"
+    - ".*(OCR|识别).*(卷子|试卷|真题).*"
     - ".*会不会考.*"
+    - ".*今年.*(考什么|重点).*"
 
 commands:
-  - name: ocr-image
-    description: 对单张/多张图片执行 OCR Pipeline，输出 LaTeX 格式题目
-    usage: "把 <image_path> 做 OCR"
+  - name: render-exam
+    description: 把 PDF/图片渲染成规范化 PNG（带 manifest）
+    usage: "python scripts/ocr/render.py --input <pdf> --outdir <dir>"
+    spec: assets/prompt-templates/vision-extract.txt
+
+  - name: extract-questions
+    description: 读 PNG 产出结构化题目 JSON（Agent 视觉能力）
+    usage: "按 assets/prompt-templates/vision-extract.txt 提取 <dir> 里的题目"
+    spec: assets/prompt-templates/vision-extract.txt
 
   - name: predict-topics
-    description: 从 PPT 和真题中提取关键词、预测考点、生成模拟题
-    usage: "用 <ppt_paths> 和 <past_exam_paths> 预测考点"
+    description: 跨卷聚类 + 考点归并 + 重新打分
+    usage: "python scripts/predict/predictor.py --input a.json --input b.json --merge topics.json"
+    spec: references/topic-merge.md
 
-  - name: render-latex
-    description: 把题目 JSON 转为 exampaper.cls 格式的 .tex 文件
-    usage: "把这些题排版成 LaTeX"
+  - name: typeset-exam
+    description: questions JSON → exampaper.cls 格式的 .tex
+    usage: "python scripts/latex/exampaper_adapter.py --input exam.json --output paper.tex"
 
   - name: compile-overleaf
-    description: 把 .tex 上传到 Overleaf 项目并编译下载 PDF
-    usage: "上传到 Overleaf 编译"
+    description: 上传 Overleaf 编译并取回 PDF
+    usage: "见 references/overleaf-workflow.md"
+    spec: references/overleaf-workflow.md
 
 dependencies:
-  python: ">=3.10"
+  python: ">=3.9"
+  packages:
+    optional: [pypdfium2, pillow]
   external_tools:
-    - XeLaTeX（仅当本地编译时需要）
+    - XeLaTeX（仅在本地编译时需要；默认走 Overleaf）
 
-config_files:
-  - path: ~/.config/seu-review-helper/ocr-providers.yaml
-    description: OCR provider 配置与凭据
-    required_for: [ocr-image]
-    example: assets/ocr-providers.example.yaml
+cost_profile:
+  api_calls: none
+  notes: |
+    零外部 API 调用。渲染与打分是本地 Python；视觉识别与考点归并由 Agent 完成。
+    压降建议：只渲染需要的页面（render.py 支持单文件输入）。
 
 references:
-  - docs/review-helper-architecture.md
+  - SKILL.md
   - references/question-types.md
-  - references/quality-rules.md
-  - references/chinese-handwriting-ocr.md
+  - references/topic-merge.md
+  - references/overleaf-workflow.md
+  - docs/backtest-report.md

@@ -1,6 +1,31 @@
+---
+name: seu-review-helper
+description: |
+  从历年真题（PDF/照片/扫描件）与课件生成复习预测试卷。四步能力可自由组合：
+  ① 试卷转结构化题目（渲染成图 + 视觉识别，能还原公式）
+  ② 按「跨卷重复度 + 位置稳定性」预测考点并给出依据
+  ③ 生成 LaTeX 试卷（exampaper 模板）
+  ④ 上传 Overleaf 编译并取回 PDF
+  触发场景：「复习」「考点预测」「期末试卷」「真题整理」「OCR 识别试卷」
+  「生成试卷」「LaTeX 试卷」「这道题会不会考」「今年重点是什么」；
+  用户提供试卷 PDF/照片、课件，或要求整理成可打印的卷子时也应使用。
+license: MIT
+metadata:
+  version: "0.2.0"
+  requires:
+    python: ">=3.9"
+    optional_packages: ["pypdfium2", "pillow"]
+---
+
 # SKILL.md — Agent 工作指令
 
 > 本文件被 Agent（Codex / WorkBuddy / Claude Code 等）自动加载。Agent 收到与"复习/考点/试卷/OCR"相关的请求时，按本文件的约定路由到对应的 Skill。
+
+**设计原则（重要）**
+
+1. **不依赖外部 API**：视觉识别与考点归并都由 Agent 自身完成——不消耗额外额度、不需要 API key
+2. **有多少资料就用多少**：试卷与课件不是二选一，按实际输入判定模式（见 Skill B）
+3. **每步都留审阅点**：中间产物先给学生看，再决定是否继续
 
 ---
 
@@ -251,12 +276,29 @@ python scripts/ocr/render.py --input scans/ --outdir .tmp-render      # 目录�
 }
 ```
 
-**实现方式**（本仓库已提供）：
+**实现方式**（两步，第二步由 Agent 自己做）：
 
 ```bash
-python scripts/predict/predictor.py --input pool.json --output predictions.json
-python scripts/predict/predictor.py --input pool.json --threshold 0.4 --format text
+# 第 1 步：统计聚类 —— 找出「跨卷近乎相同」的题目簇
+python scripts/predict/predictor.py --input exam-a.json --input exam-b.json \
+    --output candidates.json
+# --input 可多次指定；池格式或单卷格式（vision-extract 的输出）都能吃
+
+# 第 2 步：考点归并 —— Agent 按 references/topic-merge.md 的规范，
+#         把「同考点、不同措辞」的题目合并，产出 topics.json
+#         （这一步由 Agent 的语义能力完成，不需要外部模型）
+
+# 第 3 步：按归并结果重新打分
+python scripts/predict/predictor.py --input exam-a.json --input exam-b.json \
+    --merge topics.json --format text
 ```
+
+**为什么必须两步**：token 相似度只能识别「几乎相同的题」。真实数据里，
+两卷第 3 题可能一份考 `arctan` 复合函数全微分、一份考隐式偏导——字符重叠极低，
+但**同属偏导计算**。这类归并只有语义理解能做到，正是 Agent 的职责。
+
+实测（`docs/backtest-report.md`）：不做归并时只找到 6 个高频考点；
+做完归并后，**9 个填空题位全部被识别为 2/2 覆盖**。
 
 **打分公式**（详见 `docs/dataset-observations.md`）：
 

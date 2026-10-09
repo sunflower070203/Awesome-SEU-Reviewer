@@ -5,7 +5,9 @@
     python scripts/predict/test_predictor.py -v
 """
 
+import json
 import sys
+import tempfile
 import unittest
 from pathlib import Path
 
@@ -15,8 +17,10 @@ from predictor import (  # noqa: E402
     MODE_HYBRID,
     WEIGHT_POSITION,
     WEIGHT_REPEAT,
+    apply_merge,
     detect_mode,
     jaccard,
+    load_pool,
     predict,
     tokens,
 )
@@ -148,6 +152,107 @@ class TestInputMode(unittest.TestCase):
         """只有 1 份试卷无法计算跨卷重复度。"""
         with self.assertRaises(ValueError):
             predict({"exams": [exam("A", [fill(1, "x")])]})
+
+
+class TestTopicMerge(unittest.TestCase):
+    """LLM 考点归并后的重新打分（apply_merge）。"""
+
+    def test_recomputes_repeat_after_merge(self):
+        """两卷措辞不同但同考点的题，归并后应算作 2/2 覆盖。"""
+        data = {"exams": [
+            exam("A", [fill(3, r"设 $z=\arctan(xy)$，求 $dz$")]),
+            exam("B", [fill(3, r"设 $f(x,x^3)=x^6$，求 $f_y(x,x^3)$")]),
+        ]}
+        merged = {"topics": [{
+            "label": "偏导数/全微分",
+            "members": [
+                {"exam": "A", "number": 3, "type": "fill"},
+                {"exam": "B", "number": 3, "type": "fill"},
+            ],
+            "rationale": "两卷第 3 题都考偏导",
+        }]}
+        result = apply_merge(data, merged)
+        self.assertEqual(result["mode"], "merged")
+        top = result["predictions"][0]
+        self.assertEqual(top["topic"], "偏导数/全微分")
+        self.assertEqual(top["repeat"], 1.0)
+        self.assertEqual(top["position_stability"], 1.0)
+        self.assertEqual(top["score"], 1.0)
+        self.assertEqual(top["rationale"], "两卷第 3 题都考偏导")
+
+    def test_partial_coverage(self):
+        data = {"exams": [
+            exam("A", [fill(1, "x")]),
+            exam("B", [fill(1, "x")]),
+            exam("C", [fill(1, "x")]),
+        ]}
+        merged = {"topics": [{"label": "T", "members": [
+            {"exam": "A", "number": 1, "type": "fill"},
+            {"exam": "B", "number": 1, "type": "fill"},
+        ]}]}
+        top = apply_merge(data, merged)["predictions"][0]
+        self.assertAlmostEqual(top["repeat"], 0.667)
+        self.assertIsNone(top.get("stem_samples"))
+
+    def test_empty_topics_raises(self):
+        with self.assertRaises(ValueError):
+            apply_merge({"exams": [exam("A", [fill(1, "x")])]}, {"topics": []})
+
+    def test_sorted_by_score(self):
+        data = {"exams": [
+            exam("A", [fill(1, "x"), fill(2, "y")]),
+            exam("B", [fill(1, "x")]),
+        ]}
+        merged = {"topics": [
+            {"label": "低", "members": [{"exam": "A", "number": 2, "type": "fill"}]},
+            {"label": "高", "members": [
+                {"exam": "A", "number": 1, "type": "fill"},
+                {"exam": "B", "number": 1, "type": "fill"},
+            ]},
+        ]}
+        preds = apply_merge(data, merged)["predictions"]
+        self.assertEqual(preds[0]["topic"], "高")
+        self.assertEqual(preds[0]["rank"], 1)
+
+
+class TestLoadPool(unittest.TestCase):
+    """输入兼容：池格式与单卷格式（Skill A 的 vision-extract 输出）都能吃。"""
+
+    def setUp(self):
+        self.tmp = tempfile.TemporaryDirectory()
+        self.dir = Path(self.tmp.name)
+
+    def tearDown(self):
+        self.tmp.cleanup()
+
+    def _write(self, name, obj):
+        p = self.dir / name
+        p.write_text(json.dumps(obj, ensure_ascii=False), encoding="utf-8")
+        return str(p)
+
+    def test_single_exam_format(self):
+        p1 = self._write("a.json", {
+            "exam_id": "2023-24",
+            "questions": [fill(1, r"$x$")],
+        })
+        p2 = self._write("b.json", {
+            "exam_id": "2024-25",
+            "questions": [fill(1, r"$x$")],
+        })
+        pool = load_pool([p1, p2])
+        self.assertEqual([e["id"] for e in pool["exams"]], ["2023-24", "2024-25"])
+        self.assertEqual(predict(pool)["mode"], MODE_EXAM_ONLY)
+
+    def test_mixed_formats(self):
+        pool_file = self._write("pool.json", {"exams": [exam("A", [fill(1, "x")])]})
+        single = self._write("s.json", {"exam_id": "B", "questions": [fill(1, "x")]})
+        pool = load_pool([pool_file, single])
+        self.assertEqual([e["id"] for e in pool["exams"]], ["A", "B"])
+
+    def test_unrecognised_raises(self):
+        bad = self._write("bad.json", {"foo": 1})
+        with self.assertRaises(ValueError):
+            load_pool([bad])
 
 
 if __name__ == "__main__":
