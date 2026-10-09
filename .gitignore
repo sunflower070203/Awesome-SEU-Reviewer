@@ -25,6 +25,8 @@ htmlcov/
 .tmp-render/
 .tmp-signal/
 .tmp-fig-check/
+.tmp-res-test/
+.tmp-thumbs/
 
 # 真实试卷与转录数据（版权与隐私，不入库）
 pool.json

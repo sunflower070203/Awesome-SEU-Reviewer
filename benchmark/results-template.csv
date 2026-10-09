@@ -1,0 +1,13 @@
+agent,run,date,task,input_tokens,output_tokens,total_tokens,peak_context_k,wall_time_min,human_interventions,trigger_cases,compile_ok,pages,questions_total,questions_correct,figures_total,figures_good,notes
+codex,1,2026-10-09,standard,0,0,0,0,0,0,,,0,0,0,0,0,
+codex,2,2026-10-09,standard,0,0,0,0,0,0,,,0,0,0,0,0,
+codex,3,2026-10-09,standard,0,0,0,0,0,0,,,0,0,0,0,0,
+workbuddy,1,2026-10-09,standard,0,0,0,0,0,0,,,0,0,0,0,0,
+workbuddy,2,2026-10-09,standard,0,0,0,0,0,0,,,0,0,0,0,0,
+workbuddy,3,2026-10-09,standard,0,0,0,0,0,0,,,0,0,0,0,0,
+trae,1,2026-10-09,standard,0,0,0,0,0,0,,,0,0,0,0,0,
+trae,2,2026-10-09,standard,0,0,0,0,0,0,,,0,0,0,0,0,
+trae,3,2026-10-09,standard,0,0,0,0,0,0,,,0,0,0,0,0,
+kimi,1,2026-10-09,standard,0,0,0,0,0,0,,,0,0,0,0,0,
+kimi,2,2026-10-09,standard,0,0,0,0,0,0,,,0,0,0,0,0,
+kimi,3,2026-10-09,standard,0,0,0,0,0,0,,,0,0,0,0,0,
