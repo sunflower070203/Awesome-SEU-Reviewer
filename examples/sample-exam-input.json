@@ -1,0 +1,73 @@
+{
+  "header": {
+    "school_name": "东南大学",
+    "exam_title": "东南大学试卷（A 卷）",
+    "course_name": "概率论与数理统计",
+    "course_code": "ST203",
+    "semester": "2025-2026-2",
+    "major": "信息工程",
+    "exam_type": "闭卷",
+    "duration_minutes": 120
+  },
+  "questions": [
+    {
+      "number": 1,
+      "type": "choice",
+      "stem_latex": "设 $X \\sim N(\\mu, \\sigma^2)$，则 $P(|X-\\mu| < 2\\sigma)$ 约为",
+      "options": [
+        {"label": "A", "latex": "$0.6826$"},
+        {"label": "B", "latex": "$0.9544$"},
+        {"label": "C", "latex": "$0.9974$"},
+        {"label": "D", "latex": "$0.5000$"}
+      ],
+      "score": 4
+    },
+    {
+      "number": 2,
+      "type": "choice",
+      "stem_latex": "设 $A,B$ 为随机事件，且 $P(A)=0.5$，$P(B)=0.4$，$P(AB)=0.2$，则 $P(A \\cup B)=$",
+      "options": [
+        {"label": "A", "latex": "$0.5$"},
+        {"label": "B", "latex": "$0.6$"},
+        {"label": "C", "latex": "$0.7$"},
+        {"label": "D", "latex": "$0.9$"}
+      ],
+      "score": 4
+    },
+    {
+      "number": 3,
+      "type": "fill",
+      "stem_latex": "设总体 $X$ 的方差为 $\\sigma^2$，样本容量为 $n$，则样本均值 $\\bar{X}$ 的方差为 $\\underline{\\hspace{2.5cm}}$。",
+      "score": 4
+    },
+    {
+      "number": 4,
+      "type": "fill",
+      "stem_latex": "若 $X$ 服从参数为 $\\lambda$ 的泊松分布，则 $E(X)=$ $\\underline{\\hspace{2.5cm}}$。",
+      "score": 4
+    },
+    {
+      "number": 5,
+      "type": "calculation",
+      "stem_latex": "设总体 $X \\sim N(\\mu, \\sigma^2)$，$\\mu$ 未知，$\\sigma^2$ 已知。抽取容量为 $n$ 的样本，样本均值为 $\\bar{x}$。试在显著性水平 $\\alpha=0.05$ 下检验假设 $H_0: \\mu = \\mu_0$ 与 $H_1: \\mu \\neq \\mu_0$，并写出拒绝域。",
+      "score": 12
+    },
+    {
+      "number": 6,
+      "type": "calculation",
+      "stem_latex": "设随机变量 $X$ 的概率密度函数为 $f(x) = \\begin{cases} \\lambda e^{-\\lambda x}, & x > 0 \\\\ 0, & x \\leq 0 \\end{cases}$，求 $E(X)$ 与 $\\mathrm{Var}(X)$。",
+      "score": 12
+    },
+    {
+      "number": 7,
+      "type": "short_answer",
+      "stem_latex": "叙述中心极限定理（林德伯格-列维形式），并说明它在统计推断中的作用。",
+      "score": 10
+    }
+  ],
+  "options": {
+    "include_score_table": true,
+    "sidebar_seal_line": true,
+    "fontset": null
+  }
+}

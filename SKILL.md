@@ -255,6 +255,20 @@ Agent: 文本 → questions（Agent 自己解析，不走 A）
 }
 ```
 
+**实现方式**（本仓库已提供，Agent 直接调用）：
+
+```bash
+python scripts/latex/exampaper_adapter.py \
+  --input  exam.json \      # {"header": {...}, "questions": [...]}，header 也可写作 exam_meta
+  --output paper.tex
+```
+
+- 模板文件：`templates/exampaper.cls`（说明见 `templates/README.md`）
+- 题型 → 栏目标题 / 答题空间的映射，见 `scripts/latex/exampaper_adapter.py` 顶部的 `TYPE_TITLES` / `ANSWER_SPACE` 常量
+- 输入示例：`examples/sample-exam-input.json`
+- 编译：**XeLaTeX，连续两遍**
+- 选项写法：内联 `\quad A.\ ... \quad B.\ ...`（不用 enumerate，详见 `references/question-types.md`）
+
 ### Skill D: Overleaf 集成
 
 ```jsonc

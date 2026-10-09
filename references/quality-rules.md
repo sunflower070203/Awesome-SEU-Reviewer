@@ -91,17 +91,25 @@
 - ❌ 复制往年真题一字不改（必须有变化）
 - ❌ 关键词权重无依据（必须有 evidence 来源）
 
-## 校验脚本
+## 校验方式
 
-`scripts/validate_exam.py` 自动检查：
+质量校验分两层，当前**不提供独立校验脚本**（避免与 LaTeX 编译器重复劳动）：
 
-```bash
-python scripts/validate_exam.py \
-  --questions output/predicted_questions.json \
-  --tex output/predicted_exam.tex \
-  --check compile && \
-  --check traceability && \
-  --check difficulty_distribution
-```
+1. **生成前检查**（Skill B / C 内部逻辑）
+   - 题目分布是否符合 config
+   - 每道题的 `covers_keywords` 非空
+   - 分值统计是否与 `exam-config` 一致
+
+2. **编译验证**（Skill D，真实可靠的判据）
+   - 把生成的 `.tex` 上传 Overleaf 编译
+   - 从编译日志读 error / warning：
+     - `!` 开头的行 = error，必须为 0
+     - `Overfull` / `LaTeX Warning` / `Package ... Warning` = warning，记录到返回值的 `warnings` 字段
+   - 判据以 **PDF 预览出现** + **截图实际渲染** 为准（日志可能滞后于本次构建）
+
+3. **本地手工验证**（可选，学生机器装了 TeX 时）
+   ```bash
+   latexmk -xelatex main.tex     # 或 xelatex main.tex 连编两遍
+   ```
 
 校验失败时，Skill 必须把错误列表返回给学生 Agent，由学生 Agent 决定是否修改。

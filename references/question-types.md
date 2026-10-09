@@ -29,14 +29,20 @@
 
 ### 选择题选项
 
+选项**内联**在题干之后（exampaper.cls 原生风格）：
+
 ```latex
-\begin{enumerate}[label=\Alph*.]
-\item 选项 A 内容
-\item 选项 B 内容
-\item 选项 C 内容
-\item 选项 D 内容
-\end{enumerate}
+\examquestion 函数 $y=\sin x$ 的最小正周期是
+  \quad A.\ $\pi$ \quad B.\ $2\pi$ \quad C.\ $4\pi$ \quad D.\ $\dfrac{\pi}{2}$
 ```
+
+格式约定：
+- 每个选项前加 `\quad `
+- 字母后写 `.`，再跟 `\ `（反斜杠+空格）再接内容
+- 选项内容为数学式时用 `$...$` 包裹
+- 整条选项串与题干同段，不换行
+
+**禁止**用 `enumerate` + `enumitem`：exampaper.cls 未加载 enumitem，会编译失败。
 
 ### 填空题空位
 
