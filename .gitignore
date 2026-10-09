@@ -22,6 +22,7 @@ htmlcov/
 .tmp-template/
 .tmp-bridge/
 .tmp-extract/
+.tmp-render/
 
 # 真实试卷与转录数据（版权与隐私，不入库）
 pool.json

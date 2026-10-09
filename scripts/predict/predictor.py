@@ -26,6 +26,12 @@ DEFAULT_THRESHOLD = 0.5
 WEIGHT_REPEAT = 0.75
 WEIGHT_POSITION = 0.25
 
+# 输入模式：试卷与课件不是互斥关系，按实际提供的资料判定
+MODE_EXAM_ONLY = "exam_only"
+MODE_PPT_ONLY = "ppt_only"
+MODE_HYBRID = "hybrid"
+MODE_INSUFFICIENT = "insufficient"
+
 _CJK = r"[\u4e00-\u9fff]"
 _TOKEN_RE = re.compile(_CJK + r"|[A-Za-z]+|\d+")
 
@@ -111,7 +117,35 @@ def score_cluster(cluster, n_exams):
     }
 
 
+def detect_mode(data):
+    """按实际提供的资料判定模式——试卷与课件不是二选一的关系。
+
+    用户可能只有试卷、只有课件，或两者都有；此处只做判定，不做取舍。
+    """
+    exams = data.get("exams") or []
+    has_ppt = bool(data.get("ppt_paths") or data.get("ppt_text"))
+    if len(exams) >= 2 and has_ppt:
+        return MODE_HYBRID
+    if len(exams) >= 2:
+        return MODE_EXAM_ONLY
+    if has_ppt:
+        return MODE_PPT_ONLY
+    return MODE_INSUFFICIENT
+
+
 def predict(data, threshold=DEFAULT_THRESHOLD):
+    mode = detect_mode(data)
+    if mode == MODE_INSUFFICIENT:
+        raise ValueError(
+            "输入资料不足：至少需要 2 份历年试卷，或 1 份课件。"
+            "试卷与课件并不互斥，提供任意一种即可（两者都有时会尝试融合）。"
+        )
+    if mode == MODE_PPT_ONLY:
+        raise ValueError(
+            "当前版本仅实现「试卷模式」。检测到你只提供了课件（无试卷）——"
+            "请补充至少 2 份历年试卷；仅课件模式（知识点覆盖面分析）尚未实现。"
+        )
+
     exams = data["exams"]
     n = len(exams)
     clusters = cluster_questions(exams, threshold)
@@ -119,10 +153,17 @@ def predict(data, threshold=DEFAULT_THRESHOLD):
     scored.sort(key=lambda x: (-x["score"], -x["n_members"]))
     for i, p in enumerate(scored, 1):
         p["rank"] = i
+
+    warnings = []
+    if mode == MODE_HYBRID:
+        warnings.append("hybrid 模式尚未实现，本次仅按试卷重复度计算，课件未参与打分")
+
     return {
+        "mode": mode,
         "n_exams": n,
         "exam_ids": [e["id"] for e in exams],
         "threshold": threshold,
+        "warnings": warnings,
         "predictions": scored,
     }
 

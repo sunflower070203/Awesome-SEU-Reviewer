@@ -11,8 +11,11 @@ from pathlib import Path
 
 sys.path.insert(0, str(Path(__file__).parent))
 from predictor import (  # noqa: E402
+    MODE_EXAM_ONLY,
+    MODE_HYBRID,
     WEIGHT_POSITION,
     WEIGHT_REPEAT,
+    detect_mode,
     jaccard,
     predict,
     tokens,
@@ -112,6 +115,39 @@ class TestScoring(unittest.TestCase):
         scores = [p["score"] for p in preds]
         self.assertEqual(scores, sorted(scores, reverse=True))
         self.assertEqual(preds[0]["rank"], 1)
+
+
+class TestInputMode(unittest.TestCase):
+    """试卷与课件不是互斥关系：按实际提供的资料判定模式。"""
+
+    def test_exam_only(self):
+        data = {"exams": [exam("A", [fill(1, "x")]), exam("B", [fill(1, "x")])]}
+        self.assertEqual(detect_mode(data), MODE_EXAM_ONLY)
+        self.assertEqual(predict(data)["mode"], MODE_EXAM_ONLY)
+
+    def test_hybrid_when_both_present(self):
+        data = {
+            "exams": [exam("A", [fill(1, "x")]), exam("B", [fill(1, "x")])],
+            "ppt_paths": ["ch1.pptx"],
+        }
+        self.assertEqual(detect_mode(data), MODE_HYBRID)
+        result = predict(data)
+        self.assertEqual(result["mode"], MODE_HYBRID)
+        self.assertTrue(result["warnings"], "hybrid 未实现时应给出 warning")
+
+    def test_ppt_only_gives_actionable_error(self):
+        with self.assertRaises(ValueError) as ctx:
+            predict({"ppt_paths": ["ch1.pptx"]})
+        self.assertIn("试卷", str(ctx.exception))
+
+    def test_empty_input_raises(self):
+        with self.assertRaises(ValueError):
+            predict({})
+
+    def test_single_exam_is_insufficient(self):
+        """只有 1 份试卷无法计算跨卷重复度。"""
+        with self.assertRaises(ValueError):
+            predict({"exams": [exam("A", [fill(1, "x")])]})
 
 
 if __name__ == "__main__":

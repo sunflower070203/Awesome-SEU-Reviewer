@@ -176,35 +176,43 @@ Agent: 文本 → questions（Agent 自己解析，不走 A）
 
 完整 JSON Schema 见 `docs/review-helper-architecture.md`，以下是 Agent 调用时的最小示例。
 
-### Skill A: OCR → LaTeX
+### Skill A: 试卷/图片 → questions JSON
+
+**分两步：先渲染，再视觉识别。**
+
+```bash
+# 第 1 步：渲染为规范化 PNG（scripts/ocr/render.py）
+python scripts/ocr/render.py --input exam.pdf --outdir .tmp-render
+python scripts/ocr/render.py --input scans/ --outdir .tmp-render      # 目录批量
+```
+
+产出 `.tmp-render/*.png` 与 `manifest.json`（含每页尺寸与文本层字符数）。
 
 ```jsonc
-// 输入
+// 第 2 步：Agent 用视觉能力读取 PNG，按 assets/prompt-templates/vision-extract.txt
+// 的规范输出 questions JSON（Agent 自身是多模态的，无需额外 OCR API）
 {
-  "images": ["C:/.../q1.jpg", "C:/.../q2.png"],
-  "pipeline_strategy": "auto",
-  "ocr_providers": {
-    "handwriting": "tencent",
-    "formula": "mathpix"
-  },
-  "preprocess": {"enabled": true, "super_resolution": true}
-}
-
-// 输出
-{
+  "exam_id": "2024-25",
   "questions": [
     {
-      "number": 1,
-      "type": "calculation",
-      "stem_latex": "设 $X \\sim N(\\mu, \\sigma^2)$，求 ...",
-      "ocr_confidence": 0.91,
-      "needs_review": false
+      "number": 1, "type": "fill", "section": "填空题",
+      "stem_latex": "若直线 $\\frac{x-1}{2}=\\frac{y-1}{\\lambda}=\\frac{z-1}{1}$ 与直线 $x+1=y-1=z$ 垂直，则 $\\lambda=$____",
+      "score": 4,
+      "confidence": 0.95, "needs_review": false, "source_page": 1
     }
   ],
-  "ocr_summary": {"total_pages": 4, "avg_confidence": 0.83},
+  "header": {"course_name": "高等数学分析 II", "semester": "23-24-3"},
   "warnings": []
 }
 ```
+
+**为什么是"渲染 + 视觉"而非直接调 OCR API**（实测依据见 `docs/dataset-observations.md`）：
+
+- 真实试卷 PDF 的文本层可能是 **CID 乱码**（提取出来是字形索引），也可能是**纯扫描件**
+- 渲染成 2 倍 PNG 后，视觉模型能**准确还原公式、分式、求和号、分段函数**
+- 免费、无凭据依赖，且统一了「电子版 PDF」与「拍照/扫描」两条入口
+
+**外部 OCR 仅作兜底**：若 Agent 不具备视觉能力，或遇到严重涂改，再考虑腾讯云手写 OCR / Mathpix（见 `assets/ocr-providers.example.yaml`）。
 
 ### Skill B: 考点预测器
 
@@ -261,6 +269,20 @@ score = 0.75 × 跨卷重复度 + 0.25 × 位置稳定性
 **为什么不用 TF-IDF / 知识追踪**：小样本（2-4 份）下 IDF 只有 3 档、区分度极低；知识追踪需要上万条学生答题数据。真实观察表明「跨卷重复度」本身就是最强信号——三份同课程试卷的 9 道填空题里有 8 道完全相同。
 
 **课件 PPT 为可选输入**：当前实现只用试卷；若提供课件，可加回「PPT 覆盖度」维度（需重新分配权重）。
+
+**输入模式：按实际资料灵活判定**
+
+试卷与课件**不是二选一**——用户可能只有其中一种，也可能两者都有。`predictor.py` 会自动判定模式，Agent 据此提示用户，而非要求补齐某一种：
+
+| 用户手上的资料 | 模式 | 当前支持 |
+|---|---|---|
+| ≥ 2 份试卷（可与课件同时存在） | `exam_only` / `hybrid` | ✅ 均可用（hybrid 暂降级，返回值带 warning） |
+| **只有**课件、无试卷 | `ppt_only` | ❌ 未实现，报错并说明需补充试卷 |
+| 两者都不足 | `insufficient` | ❌ 报错，说明最低要求 |
+
+判定逻辑：`≥2 份试卷` + `有课件` → hybrid；`≥2 份试卷` → exam_only；`仅课件` → ppt_only。
+
+> 设计原则：**有多少资料就用多少**——不要因为用户没给课件就拒绝服务，也不要因为没给试卷就报「资料不全」而不提示替代路径。
 
 ### Skill C: LaTeX 试卷生成
 

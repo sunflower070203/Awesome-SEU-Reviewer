@@ -1,0 +1,78 @@
+# 视觉提取规范（Skill A 第二步）
+
+你面前是若干张试卷页面的 PNG（由 `render.py` 产出）。你的任务是把它们转成结构化题目 JSON。
+
+## 输出格式（严格 JSON，不要额外文字）
+
+```json
+{
+  "exam_id": "<由 Agent 从文件名/页眉推断，如 2024-25>",
+  "source_pages": 6,
+  "questions": [
+    {
+      "number": 1,
+      "type": "fill",
+      "stem_latex": "若直线 $\\frac{x-1}{2}=\\frac{y-1}{\\lambda}=\\frac{z-1}{1}$ 与直线 $x+1=y-1=z$ 垂直，则 $\\lambda=$____",
+      "options": null,
+      "score": 4,
+      "section": "填空题",
+      "confidence": 0.95,
+      "needs_review": false,
+      "review_reason": null,
+      "source_page": 1
+    }
+  ],
+  "header": {
+    "course_name": "高等数学分析 II",
+    "course_code": "B07M1041",
+    "semester": "23-24-3",
+    "exam_type": "闭卷",
+    "duration_minutes": 150
+  },
+  "warnings": []
+}
+```
+
+## 字段规则
+
+| 字段 | 规则 |
+|---|---|
+| `number` | 该题型内的小题号（1, 2, 3…），从页面上的编号读取 |
+| `type` | `choice` / `fill` / `calculation` / `short_answer` / `proof` / `image_question` / `circuit_question` |
+| `stem_latex` | 题干，**必须转成 LaTeX**；行内公式用 `$...$`，行间用 `$$...$$` |
+| `options` | 仅选择题有；`[{"label":"A","latex":"..."}]` |
+| `score` | 从栏目标题（如「每小题 4 分」）读取；若为「本题满分 X 分」且只有一题，填 X |
+| `section` | 所属大题标题里的题型名（「填空题」「计算题」…） |
+| `confidence` | 0–1，你对本题**识别正确**的把握 |
+| `needs_review` | `confidence < 0.85` 或存在看不清的部分时为 `true` |
+| `source_page` | 该题所在的页码（manifest 里的 page 序号） |
+
+## LaTeX 化规则
+
+- 分式：`\frac{a}{b}`；根式：`\sqrt{x}`；积分：`\iint_D`、`\int_L`、`\oint`
+- 上下标：`x^2`、`a_n`、`\sum_{n=1}^{\infty}`
+- 希腊字母：`\alpha \beta \lambda \mu \sigma \pi`
+- 分段函数：`\begin{cases}...\\...\end{cases}`
+- 方程组：`\begin{cases}...\\...\end{cases}`
+- 填空横线：统一写成 `____`（下划线长度不携带信息）
+- 角度/绝对值：`|x+y|`
+- **不要**用 `\[ ... \]`（模板兼容性差）
+
+## 识别注意事项
+
+1. **逐页处理，不要跳页**。页眉页脚（页码、"共 X 页"）不要当题目。
+2. **数字与符号要逐字符核对**——`\lambda` 与 `2`、`1` 与 `l`、`O` 与 `0` 是常见混淆点。
+3. **涂改/模糊处**：能推断则给出并降低 `confidence`；无法推断则在该位置写 `[?]` 并标 `needs_review`。
+4. **图片/电路题**：`stem_latex` 里写题干文字，另加 `"has_image": true` 与 `"image_description"`（用文字描述图形，供后续重绘）。
+5. **分栏排版**：若试卷分左右栏，按「先左后右、自上而下」的顺序读取。
+
+## 完成后
+
+把结果写入 `questions.json`，然后**把 `needs_review=true` 的题目逐条列给用户**，请其核对。不要静默处理低置信项。
+
+## 不做的事
+
+- 不猜题目（看不清就标出来）
+- 不补全缺失的条件
+- 不合并或拆分题目
+- 不修改题号
