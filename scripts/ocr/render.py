@@ -106,25 +106,50 @@ def assess(entry):
 
 def main():
     ap = argparse.ArgumentParser(description="Skill A: PDF/图片 → 规范化 PNG")
-    ap.add_argument("--input", required=True, help="PDF、图片或目录")
+    ap.add_argument("--input", required=True, action="append",
+                    help="PDF、图片或目录；可多次指定（也可一次传多个路径）")
     ap.add_argument("--outdir", required=True, help="输出目录")
     ap.add_argument("--scale", type=float, help="自定义渲染倍率（覆盖 --profile）")
     ap.add_argument("--profile", choices=list(PROFILES), default=DEFAULT_PROFILE,
                     help="渲染档位：quality=2.0（默认）/ balanced=1.5 / fast=1.0")
+    ap.add_argument("--skip-existing", action="store_true",
+                    help="跳过已渲染的源（便于分批续跑）")
     args = ap.parse_args()
     scale = args.scale if args.scale else PROFILES[args.profile]
 
-    src = Path(args.input)
     outdir = Path(args.outdir)
     outdir.mkdir(parents=True, exist_ok=True)
 
-    if src.is_dir():
-        files = sorted(p for p in src.iterdir() if p.suffix.lower() in IMAGE_EXT | {".pdf"})
-    else:
-        files = [src]
+    files = []
+    for raw in args.input:
+        src = Path(raw)
+        if src.is_dir():
+            files.extend(sorted(p for p in src.iterdir()
+                                if p.suffix.lower() in IMAGE_EXT | {".pdf"}))
+        elif src.exists():
+            files.append(src)
+        else:
+            print("skip (not found): " + str(src), file=sys.stderr)
 
     if not files:
-        sys.exit("没有可处理的文件：" + str(src))
+        sys.exit("没有可处理的文件")
+
+    if args.skip_existing:
+        manifest_path = outdir / "manifest.json"
+        done = set()
+        if manifest_path.exists():
+            try:
+                prev = json.loads(manifest_path.read_text(encoding="utf-8"))
+                done = {s["source"] for s in prev.get("sources", [])}
+            except Exception:  # noqa: BLE001
+                done = set()
+        kept = [f for f in files if f.name not in done]
+        if done:
+            print("skipping {} already rendered".format(len(files) - len(kept)), file=sys.stderr)
+        files = kept
+        if not files:
+            print("nothing to do", file=sys.stderr)
+            return
 
     entries = []
     for f in files:
@@ -135,16 +160,25 @@ def main():
         else:
             print("skipped (unsupported): " + f.name, file=sys.stderr)
 
+    manifest_path = outdir / "manifest.json"
+    sources = list(entries)
+    if manifest_path.exists():
+        try:
+            prev = json.loads(manifest_path.read_text(encoding="utf-8"))
+            names = {e["source"] for e in entries}
+            sources = [s for s in prev.get("sources", []) if s["source"] not in names] + sources
+        except Exception:  # noqa: BLE001
+            pass
+
     manifest = {"outdir": str(outdir), "scale": scale,
                 "profile": args.profile if not args.scale else "custom",
-                "sources": entries}
-    mpath = outdir / "manifest.json"
-    with open(mpath, "w", encoding="utf-8") as fp:
+                "sources": sources}
+    with open(manifest_path, "w", encoding="utf-8") as fp:
         json.dump(manifest, fp, ensure_ascii=False, indent=2)
 
     total_pages = sum(len(e["pages"]) for e in entries)
     print("rendered: {} source(s), {} page(s) -> {}".format(len(entries), total_pages, outdir))
-    print("manifest: " + str(mpath))
+    print("manifest: " + str(manifest_path))
 
 
 if __name__ == "__main__":
