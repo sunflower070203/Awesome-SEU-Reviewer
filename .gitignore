@@ -30,6 +30,8 @@ htmlcov/
 .tmp-profile-test/
 .tmp-dl/
 .tmp-fig/
+.tmp-ckz/
+.tmp-pp/
 
 # 真实试卷与转录数据（版权与隐私，不入库）
 pool.json

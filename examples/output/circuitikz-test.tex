@@ -1,0 +1,51 @@
+\documentclass[12pt,a4paper]{exampaper}
+\usepackage{circuitikz}
+\examname{circuitikz 兼容性测试}
+\examsidebarfalse
+
+\begin{document}
+
+\examtitle{circuitikz 测试}
+
+\begin{center}
+\begin{circuitikz}[scale=0.85, transform shape]
+  % 共射放大电路（分压偏置 + 旁路）
+  \draw (0,0) node[npn](T){$T$}
+    (T.C) to[R=$R_C$] ++(0,2.2) node[vcc]{$V_{CC}$}
+    (T.E) to[R=$R_{E1}$] ++(0,-1.4) coordinate(ne)
+          to[R=$R_{E2}$] ++(0,-1.4) node[ground]{}
+    (ne) to[C=$C_E$] ++(2.2,0) |- (T.E)
+    (T.B) to[R=$R_{B1}$] ++(0,2.0) -- ++(0,0.2) coordinate(top)
+    (T.B) to[R=$R_{B2}$] ++(0,-2.0) node[ground]{}
+    (T.B) to[C=$C_B$] ++(-1.8,0)
+          to[R=$R_s$] ++(-1.6,0) coordinate(src)
+    (src) to[sV,l=$v_s$] ++(0,-2.0) node[ground]{}
+    (T.C) to[C=$C_C$] ++(2.0,0) coordinate(vo)
+    (vo) to[open,v^=$v_o$] ++(0,-2.0) node[ground]{};
+\end{circuitikz}
+\end{center}
+
+\vspace{1em}
+\begin{center}
+\begin{circuitikz}[scale=0.85, transform shape]
+  % 稳压管电路
+  \draw (0,0) to[V,l=$20\,\mathrm{V}$] ++(0,2.5)
+        to[R=$R$] ++(2.6,0) coordinate(node_o)
+        -- ++(0,-1.0)
+        to[zDo=$D_1$] ++(0,-1.0)
+        to[zDo=$D_2$] ++(0,-1.0) node[ground]{};
+  \draw (node_o) to[open,v^=$V_o$] ++(1.6,-2.5) node[ground]{};
+\end{circuitikz}
+\end{center}
+
+\vspace{1em}
+\begin{center}
+\begin{tikzpicture}
+  % 正弦波形（验证 tikz 画函数曲线）
+  \draw[->] (0,0) -- (6.2,0) node[right]{$\omega t$};
+  \draw[->] (0,-1.4) -- (0,1.4) node[above]{$v_I$};
+  \draw[thick] plot[domain=0:6,samples=120] (\x, {sin(\x r)});
+\end{tikzpicture}
+\end{center}
+
+\end{document}
