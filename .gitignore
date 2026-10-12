@@ -29,6 +29,7 @@ htmlcov/
 .tmp-thumbs/
 .tmp-profile-test/
 .tmp-dl/
+.tmp-fig/
 
 # 真实试卷与转录数据（版权与隐私，不入库）
 pool.json

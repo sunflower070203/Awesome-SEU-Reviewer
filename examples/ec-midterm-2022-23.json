@@ -1,0 +1,71 @@
+{
+  "header": {
+    "school_name": "东南大学",
+    "exam_title": "东南大学试卷（期中卷）",
+    "course_name": "电子电路基础",
+    "course_code": "",
+    "semester": "2022-2023-2",
+    "major": "信息工程",
+    "exam_type": "闭卷",
+    "duration_minutes": 120
+  },
+  "questions": [
+    {"number": 1, "type": "fill", "score": 2,
+     "stem_latex": "为了保证三极管工作在放大区，要求：发射结\\underline{\\hspace{1.6cm}} 偏置，集电结\\underline{\\hspace{1.6cm}} 偏置。"},
+    {"number": 2, "type": "fill", "score": 2,
+     "stem_latex": "共射、共集和共基三种基本组态放大电路中，输出电阻最小的是\\underline{\\hspace{1.6cm}}，输入电阻最小的是\\underline{\\hspace{1.6cm}}。"},
+    {"number": 3, "type": "fill", "score": 2,
+     "stem_latex": "N 型半导体中多数载流子是\\underline{\\hspace{1.6cm}}，P 型半导体中少数载流子是\\underline{\\hspace{1.6cm}}。"},
+    {"number": 4, "type": "fill", "score": 2,
+     "stem_latex": "FET 是\\underline{\\hspace{1.6cm}} 控制电流的器件，只依靠一种载流子导电，因而属于单极型器件。"},
+
+    {"number": 5, "type": "choice", "score": 2, "options_per_line": 1,
+     "stem_latex": "在放大电路的晶体管中，电位最高的一个电极是（　　）。",
+     "options": [
+       {"label": "A", "latex": "PNP 管的集电极"},
+       {"label": "B", "latex": "PNP 管的发射极"},
+       {"label": "C", "latex": "NPN 管的发射极"},
+       {"label": "D", "latex": "NPN 管的基极"}
+     ]},
+    {"number": 6, "type": "choice", "score": 2, "options_per_line": 3,
+     "stem_latex": "稳压二极管是一个可逆击穿二极管，稳压时工作在（　　）状态。",
+     "options": [
+       {"label": "A", "latex": "正偏"},
+       {"label": "B", "latex": "反偏"},
+       {"label": "C", "latex": "截止"}
+     ]},
+    {"number": 7, "type": "choice", "score": 2, "options_per_line": 2,
+     "stem_latex": "为了获得反相电压放大，则应选用（　　）放大电路。",
+     "options": [
+       {"label": "A", "latex": "共发射极"},
+       {"label": "B", "latex": "共集电极"},
+       {"label": "C", "latex": "共基极"},
+       {"label": "D", "latex": "共栅极"}
+     ]},
+
+    {"number": 1, "type": "calculation", "score": 6,
+     "stem_latex": "下图 (a) 为钳位电路，图 (b) 为输入正弦波形。设电容 $C$ 上初始电压为 0，$V_m=15\\,\\mathrm{V}$，二极管导通电压为 0.7\\,$\\mathrm{V}$，$R_LC$ 数值是信号周期的 10 倍以上。试画出输出信号波形。\n\n  \\begin{center}\n  \\includegraphics[width=0.46\\textwidth]{figures/circuit/c1-clamp-circuit.pdf}\\hspace{0.8em}\n  \\includegraphics[width=0.50\\textwidth]{figures/circuit/c2-clamp-wave.pdf}\\\\\n  \\footnotesize 图 1\n  \\end{center}"},
+
+    {"number": 2, "type": "calculation", "score": 10,
+     "stem_latex": "(1) 分析下图 (a) 所示电路的工作原理，试写出输出信号 $V_O$ 的逻辑表达式；\n\n(2) 图 (b) 中 $V_A$、$V_B$、$V_C$ 为某一电路的输入波形，$V_O$ 为其输出波形。请分析并写出 $V_O$ 与 $V_A$、$V_B$、$V_C$ 的关系式，并设计 CMOS 逻辑门电路实现之，画出设计的逻辑门电路。\n\n  \\begin{center}\n  \\includegraphics[width=0.40\\textwidth]{figures/circuit/c8-cmos-gate.pdf}\\hspace{1.2em}\n  \\includegraphics[width=0.50\\textwidth]{figures/circuit/c9-gate-wave.pdf}\\\\\n  \\footnotesize 图 2\n  \\end{center}"},
+
+    {"number": 3, "type": "calculation", "score": 4,
+     "stem_latex": "下图所示为稳压电路，稳压管 $D_1$、$D_2$ 的稳定电压分别是 6\\,$\\mathrm{V}$ 和 8\\,$\\mathrm{V}$，导通电压 0.7\\,$\\mathrm{V}$。试求输出端电压 $V_o$。\n\n  \\begin{center}\n  \\includegraphics[width=0.50\\textwidth]{figures/circuit/c3-zener.pdf}\\\\\n  \\footnotesize 图 3\n  \\end{center}"},
+
+    {"number": 4, "type": "calculation", "score": 20,
+     "stem_latex": "如图所示，已知 $V_{DD}=10\\,\\mathrm{V}$，$v_I=(3+0.02\\sin\\omega t)\\,\\mathrm{V}$，$\\dfrac{1}{2}\\mu_n C_{ox}\\dfrac{W}{L}=\\dfrac{1}{2}\\mu_p C_{ox}\\dfrac{W}{L}=50\\,\\mu\\mathrm{A}/\\mathrm{V}^2$；$T_2$ 管 $V_{GS(th)}$ 绝对值为 2\\,$\\mathrm{V}$，$T_1$ 管 $V_{GS(th)}$ 绝对值为 1\\,$\\mathrm{V}$，两管 $V_A$ 绝对值为 100\\,$\\mathrm{V}$。\n\n(1) 求晶体管 $T_1$、$T_2$ 漏极的直流电流 $I_{D1}$；\n\n(2) 指出 $T_1$ 和 $T_2$ 管的作用；\n\n(3) 画出该电路的小信号等效电路；\n\n(4) 写出该电路的电压增益表达式 $A_v$ 及计算结果；\n\n(5) 求出 $v_o$ 点的瞬时表达式。\n\n  \\begin{center}\n  \\includegraphics[width=0.38\\textwidth]{figures/circuit/c4-cmos-amp.pdf}\\\\\n  \\footnotesize 图 4\n  \\end{center}"},
+
+    {"number": 5, "type": "calculation", "score": 13,
+     "stem_latex": "下图为两级放大器的交流通路。\n\n(1) 请说明每级放大器的组态；\n\n(2) 写出放大器的增益 $A_v$、源增益 $A_{vs}$ 和输入电阻 $R_i$ 的表达式；\n\n(3) 若信号源电阻 $R_s$ 较大，为了提高源增益 $A_{vs}$，可以在放大器输入端插入一级什么组态的放大器？请简要说明理由。\n\n  \\begin{center}\n  \\includegraphics[width=0.68\\textwidth]{figures/circuit/c5-multistage.pdf}\\\\\n  \\footnotesize 图 5\n  \\end{center}"},
+
+    {"number": 6, "type": "calculation", "score": 15,
+     "stem_latex": "下图所示为带恒流源的差分放大电路，设各管参数相同，$V_{BE}=0.7\\,\\mathrm{V}$，$\\beta$ 足够大。试求电路的静态工作点（提示：先计算参考支路电流 $I_{CQ3}$，再计算 $I_{CQ1}$、$I_{CQ2}$）。\n\n  \\begin{center}\n  \\includegraphics[width=0.64\\textwidth]{figures/circuit/c6-diff-amp.pdf}\\\\\n  \\footnotesize 图 6\n  \\end{center}"},
+
+    {"number": 7, "type": "calculation", "score": 15,
+     "stem_latex": "下图所示为分压式偏置共射放大电路。\n\n(1) 画出直流通路，求静态工作点 $I_{CQ}$、$V_{CEQ}$；\n\n(2) 画出交流通路及微变等效电路；\n\n(3) 求电压增益 $A_v$、输入电阻 $R_i$ 和输出电阻 $R_o$。\n\n  \\begin{center}\n  \\includegraphics[width=0.74\\textwidth]{figures/circuit/c7-ce-amp.pdf}\\\\\n  \\footnotesize 图 7\n  \\end{center}"}
+  ],
+  "options": {
+    "include_score_table": true,
+    "sidebar_seal_line": false
+  }
+}
