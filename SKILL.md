@@ -211,6 +211,19 @@ python scripts/ocr/render.py --input exam.pdf --outdir .tmp-render
 python scripts/ocr/render.py --input scans/ --outdir .tmp-render      # 目录批量
 ```
 
+**第 0 步（若输入是照片/截图）：先瘦身**
+
+```bash
+python scripts/ocr/preprocess.py --input photos/ --outdir .tmp-ocr
+```
+
+自动裁掉四周无关区域 + 长边降到 1600px。实测 8 张 PPT 照片在 Claude 口径下
+**85.5k → 23.5k（省 73%）**。
+
+> **注意**：OpenAI 类模型按 512px 分块计费，降分辨率**不省**——对它有效的是
+> **减少张数**（只处理需要的页）。裁剪对"拍屏幕"的照片效果有限（UI 元素
+> 也有强边缘），对背景干净的手拍纸张/扫描件更有效。
+
 产出 `.tmp-render/*.png` 与 `manifest.json`（含每页尺寸、文本层字符数与所用档位）。
 
 **渲染档位：默认 `quality`（2.0×）——质量优先，不要为了省 token 牺牲识别率。**
