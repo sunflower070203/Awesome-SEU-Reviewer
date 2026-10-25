@@ -98,6 +98,10 @@ python scripts/bench/estimate_tokens.py --images <图片目录> --text <产物.j
 2. **触发失败的共同点**——哪类措辞大家都不认？
 3. **质量差异在哪**——公式还原？图表？还是题目切分？
 
+> **拿到数据之后怎么分析、该先改什么、哪些是常见的误判，见
+> [`docs/benchmark-playbook.md`](docs/benchmark-playbook.md)**。
+> 那篇是这份说明的下半场，别跳过。
+
 ---
 
 ## 5. 可认领的工作
@@ -172,6 +176,7 @@ python scripts/bench/estimate_tokens.py --images <图片目录> --text <产物.j
 | 题型规范 | `references/question-types.md` |
 | 考点归并的判断准则 | `references/topic-merge.md` |
 | 评测套件 | `benchmark/` |
+| **拿到数据后怎么分析、怎么优化** | **`docs/benchmark-playbook.md`** |
 
 ---
 
