@@ -150,6 +150,9 @@ Awesome-SEU-Reviewer/
 
 欢迎提 Issue / PR 改进识别准确率、扩充题型模板、增加新学科的词表与图形。
 
+**第一次参与请先读 [`CONTRIBUTING.md`](CONTRIBUTING.md)** ——
+里面有环境准备、自检方法、跑评测的完整流程、当前可认领的任务，以及已知的坑。
+
 ## 许可证
 
 MIT
