@@ -1,0 +1,22 @@
+# Awesome-SEU-Reviewer 依赖
+#
+# 安装：
+#   pip install -r requirements.txt
+#
+# 全部是纯 Python 包（无系统级依赖），Windows / macOS / Linux 通用。
+
+# ---- 核心：渲染与图片处理 ----
+pypdfium2>=4.0        # PDF → PNG 渲染
+Pillow>=10.0          # 图片裁剪、缩放、尺寸读取
+numpy>=1.24           # 图片预处理（边缘投影找内容边界）
+
+# ---- 可选：仅当需要把 SVG 图转成 LaTeX 可用的 PDF ----
+# 注意：不要用 cairosvg —— 它在 Windows 上缺 cairo 运行库，装得上但用不了
+svglib>=1.5
+reportlab>=4.0
+
+# ---- 可选：仅当试卷是 .docx（且内容为内嵌扫描图）----
+python-docx>=1.1
+
+# ---- 可选：如果偏好 pytest（脚本自带的 unittest 不需要额外依赖）----
+# pytest>=7.0

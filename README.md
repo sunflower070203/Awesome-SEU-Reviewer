@@ -48,12 +48,23 @@
 ### 安装
 
 ```bash
-# 任选一个 Agent 的 skills 目录
+# 1. 克隆到某个 Agent 的 skills 目录
 git clone https://github.com/sunflower070203/Awesome-SEU-Reviewer.git ~/.claude/skills/seu-review-helper
-git clone https://github.com/sunflower070203/Awesome-SEU-Reviewer.git ~/.codex/skills/seu-review-helper
+# 或 ~/.codex/skills/seu-review-helper
+
+# 2. 安装 Python 依赖（纯 Python 包，无系统级依赖）
+cd ~/.claude/skills/seu-review-helper
+pip install -r requirements.txt
 ```
 
 WorkBuddy 用户可直接通过技能市场导入。
+
+**依赖说明**：核心只需 `pypdfium2` + `Pillow` + `numpy`（渲染、裁剪、打分）；
+`svglib`/`reportlab` 仅在需要把 SVG 图转 PDF 时用到；`python-docx` 仅在试卷是
+`.docx` 且内容为内嵌扫描图时用到。**全程不需要任何 API key。**
+
+> 自检：装完后运行 `python scripts/ocr/test_preprocess.py`，
+> 6 个测试全过说明环境正常。
 
 ### 第一次使用
 
