@@ -33,6 +33,7 @@ htmlcov/
 .tmp-ckz/
 .tmp-pp/
 .tmp-fork-test/
+.tmp-yolo/
 
 # 真实试卷与转录数据（版权与隐私，不入库）
 pool.json
